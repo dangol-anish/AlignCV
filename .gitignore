@@ -1,0 +1,62 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Node.js dependencies
+node_modules/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Logs
+*.log
+logs/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Build directories
+dist/
+build/
+out/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Temporary files
+*.tmp
+*.temp
+
+# MacOS
+*.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Compiled source #
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Package managers
+package-lock.json
+yarn.lock
+
+# Coverage reports
+coverage/
+*.lcov
+
+# Misc
+*.swp
+*~
+

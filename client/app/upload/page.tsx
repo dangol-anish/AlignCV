@@ -5,6 +5,7 @@ import { useState } from "react";
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [message, setMessage] = useState("");
+  const [extractedText, setExtractedText] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -28,25 +29,27 @@ export default function UploadPage() {
         body: formData,
       });
 
-      const data = await res.json();
+      const data = await res.json(); // ✅ Only read once
 
-      if (res.ok) {
-        setMessage("File uploaded successfully!");
-      } else {
-        setMessage(data.message || "Upload failed");
+      if (!res.ok) {
+        throw new Error(data?.message || "Upload failed");
       }
-    } catch (error) {
-      setMessage("Upload error" + error);
+
+      setExtractedText(data?.file?.text || "");
+      setMessage("File uploaded successfully!");
+    } catch (error: any) {
+      setMessage("Upload error: " + error.message);
     }
   }
 
   return (
     <div className="max-w-md mx-auto p-4">
       <h1 className="text-xl font-bold mb-4">Upload Your Resume or Image</h1>
+
       <form onSubmit={handleSubmit}>
         <input
           type="file"
-          onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+          onChange={(e) => setFile(e.target.files?.[0] || null)}
           accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt,.rtf"
           className="mb-4"
         />
@@ -57,7 +60,17 @@ export default function UploadPage() {
           Upload
         </button>
       </form>
+
       {message && <p className="mt-4 text-red-600">{message}</p>}
+
+      {extractedText && (
+        <div className="mt-6 p-4 bg-gray-100 rounded">
+          <h2 className="text-lg font-semibold mb-2">Extracted Text:</h2>
+          <pre className="whitespace-pre-wrap text-sm text-gray-800">
+            {extractedText}
+          </pre>
+        </div>
+      )}
     </div>
   );
 }

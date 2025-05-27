@@ -1,5 +1,7 @@
 import { Response } from "express";
 import { MulterRequest } from "../interfaces/upload";
+import { extractTextFromBuffer } from "../../services/textExtractor";
+import { ExtractedFileInfo } from "../interfaces/textExtractor";
 
 export async function handleFileUpload(req: MulterRequest, res: Response) {
   if (!req.file) {
@@ -8,11 +10,33 @@ export async function handleFileUpload(req: MulterRequest, res: Response) {
       .json({ success: false, message: "No file uploaded" });
   }
 
-  console.log("Received file:", {
-    originalname: req.file.originalname,
-    mimetype: req.file.mimetype,
-    size: req.file.size,
-  });
+  const { originalname, mimetype, size, buffer } = req.file;
 
-  res.json({ success: true, message: "File uploaded successfully" });
+  console.log("Received file:", { originalname, mimetype, size });
+
+  try {
+    const text = await extractTextFromBuffer(
+      buffer,
+      mimetype as ExtractedFileInfo["type"]
+    );
+
+    const fileInfo: ExtractedFileInfo = {
+      name: originalname,
+      type: mimetype as ExtractedFileInfo["type"],
+      size,
+      text: text.trim(),
+    };
+
+    res.json({
+      success: true,
+      file: fileInfo,
+    });
+  } catch (error: any) {
+    console.error("Text extraction failed:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to extract text from file",
+      error: error.message,
+    });
+  }
 }

@@ -2,6 +2,9 @@ import { Response } from "express";
 import { MulterRequest } from "../interfaces/upload";
 import { extractTextFromBuffer } from "../../services/textExtractor";
 import { ExtractedFileInfo } from "../interfaces/textExtractor";
+import { cleanExtractedText } from "../../services/textCleaner";
+import { parseResumeWithGemini } from "../../services/resumeParser";
+import { isSupportedMimeType } from "../../utils/isSupportedMimeType";
 
 export async function handleFileUpload(req: MulterRequest, res: Response) {
   if (!req.file) {
@@ -12,24 +15,27 @@ export async function handleFileUpload(req: MulterRequest, res: Response) {
 
   const { originalname, mimetype, size, buffer } = req.file;
 
-  console.log("Received file:", { originalname, mimetype, size });
+  if (!isSupportedMimeType(mimetype)) {
+    return res.status(400).json({
+      success: false,
+      message: `Unsupported file type: ${mimetype}`,
+    });
+  }
 
   try {
-    const text = await extractTextFromBuffer(
-      buffer,
-      mimetype as ExtractedFileInfo["type"]
-    );
-
-    const fileInfo: ExtractedFileInfo = {
-      name: originalname,
-      type: mimetype as ExtractedFileInfo["type"],
-      size,
-      text: text.trim(),
-    };
+    const rawText = await extractTextFromBuffer(buffer, mimetype);
+    const cleanedText = cleanExtractedText(rawText);
+    const structuredData = await parseResumeWithGemini(cleanedText);
 
     res.json({
       success: true,
-      file: fileInfo,
+      file: {
+        name: originalname,
+        type: mimetype,
+        size,
+        text: cleanedText,
+      },
+      parsed: structuredData,
     });
   } catch (error: any) {
     console.error("Text extraction failed:", error);

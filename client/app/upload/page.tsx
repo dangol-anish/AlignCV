@@ -1,13 +1,15 @@
 "use client";
 
+import { DynamicResumeSections } from "@/types/resume";
 import { useState } from "react";
-import { ParsedResume } from "@/types/resume";
 
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [message, setMessage] = useState("");
   const [extractedText, setExtractedText] = useState("");
-  const [parsedData, setParsedData] = useState<ParsedResume | null>(null);
+  const [parsedData, setParsedData] = useState<DynamicResumeSections | null>(
+    null
+  );
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -42,7 +44,7 @@ export default function UploadPage() {
       }
 
       setExtractedText(data.file?.text || "");
-      setParsedData(data.parsed || null);
+      setParsedData(data?.parsed);
       setMessage("File uploaded successfully!");
     } catch (error: any) {
       setMessage("Upload error: " + error.message);
@@ -80,89 +82,19 @@ export default function UploadPage() {
       )}
 
       {parsedData && (
-        <section className="mt-6 p-4 bg-white border rounded shadow">
-          <h2 className="text-lg font-semibold mb-4">Parsed Resume Data</h2>
-
-          <p>
-            <strong>Name:</strong> {parsedData.name || "N/A"}
-          </p>
-          <p>
-            <strong>Email:</strong> {parsedData.email || "N/A"}
-          </p>
-          <p>
-            <strong>Phone:</strong> {parsedData.phone || "N/A"}
-          </p>
-
-          <div>
-            <strong>Skills:</strong>
-            {parsedData.skills?.length ? (
-              <ul className="list-disc ml-6">
-                {parsedData.skills.map((skill, i) => (
-                  <li key={i}>{skill}</li>
-                ))}
-              </ul>
-            ) : (
-              <span> N/A</span>
-            )}
-          </div>
-
-          <div className="mt-4">
-            <strong>Education:</strong>
-            {parsedData.education?.length ? (
-              <ul className="list-disc ml-6">
-                {parsedData.education.map((edu, i) => (
-                  <li key={i}>
-                    <p>
-                      <strong>Degree:</strong> {edu.degree}
-                    </p>
-                    <p>
-                      <strong>Institution:</strong> {edu.institution}
-                    </p>
-                    <p>
-                      <strong>Dates:</strong> {edu.startDate || "?"} –{" "}
-                      {edu.endDate || "?"}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <span> N/A</span>
-            )}
-          </div>
-
-          <div className="mt-4">
-            <strong>Experience:</strong>
-            {parsedData.experience?.length ? (
-              <ul className="list-disc ml-6">
-                {parsedData.experience.map((exp, i) => (
-                  <li key={i} className="mb-2">
-                    <p>
-                      <strong>Job Title:</strong> {exp.jobTitle}
-                    </p>
-                    <p>
-                      <strong>Company:</strong> {exp.company}
-                    </p>
-                    <p>
-                      <strong>Dates:</strong> {exp.startDate || "?"} –{" "}
-                      {exp.endDate || "?"}
-                    </p>
-                    {exp.responsibilities?.length ? (
-                      <ul className="list-disc ml-8">
-                        {exp.responsibilities.map((resp, j) => (
-                          <li key={j}>{resp}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p>No responsibilities listed</p>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <span> N/A</span>
-            )}
-          </div>
-        </section>
+        <div className="mt-6 p-4 bg-gray-50 rounded border border-gray-200">
+          <h2 className="text-lg font-semibold mb-2">Parsed Resume Data:</h2>
+          {Object.entries(parsedData).map(([section, content]) => (
+            <div key={section} className="mb-4">
+              <h3 className="text-md font-bold">{section}</h3>
+              <pre className="text-sm whitespace-pre-wrap text-gray-800">
+                {typeof content === "string"
+                  ? content
+                  : JSON.stringify(content, null, 2)}
+              </pre>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

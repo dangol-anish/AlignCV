@@ -1,10 +1,10 @@
 import { Response } from "express";
 import { MulterRequest } from "../interfaces/upload";
 import { extractTextFromBuffer } from "../../services/textExtractor";
-import { ExtractedFileInfo } from "../interfaces/textExtractor";
 import { cleanExtractedText } from "../../services/textCleaner";
 import { parseResumeWithGemini } from "../../services/resumeParser";
 import { isSupportedMimeType } from "../../utils/isSupportedMimeType";
+import { DynamicResumeSections } from "../interfaces/resume";
 
 export async function handleFileUpload(req: MulterRequest, res: Response) {
   if (!req.file) {
@@ -25,7 +25,9 @@ export async function handleFileUpload(req: MulterRequest, res: Response) {
   try {
     const rawText = await extractTextFromBuffer(buffer, mimetype);
     const cleanedText = cleanExtractedText(rawText);
-    const structuredData = await parseResumeWithGemini(cleanedText);
+    const structuredData = (await parseResumeWithGemini(
+      cleanedText
+    )) as DynamicResumeSections;
 
     res.json({
       success: true,

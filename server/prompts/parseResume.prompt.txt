@@ -1,0 +1,10 @@
+  You're an intelligent resume parser. Analyze the following resume and extract all high-level sections as a structured JSON.
+
+  Guidelines:
+    - Each key should be the section title (e.g., "Summary", "Experience", "Skills", "Certifications", etc.).
+    - Each value should contain the relevant content. If it's structured (like jobs, skills), return arrays or objects.
+    - Be flexible: some resumes may include unique sections like "Awards", "Publications", or "Languages".
+    - Only return the JSON. Do not include any commentary or code blocks.
+
+    Resume:
+    """${cleanedText}"""

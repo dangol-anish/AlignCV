@@ -6,6 +6,8 @@ import { parseResumeWithGemini } from "../../services/resumeParser";
 import { isSupportedMimeType } from "../../utils/isSupportedMimeType";
 import { DynamicResumeSections } from "../interfaces/resume";
 import { scoreResumeATS } from "../../services/atsScorer";
+import { classifyResumeCategories } from "../../services/categoryClassifier";
+import { CategoryClassifierResult } from "../interfaces/analysis";
 
 export async function handleFileUpload(req: MulterRequest, res: Response) {
   if (!req.file) {
@@ -30,6 +32,7 @@ export async function handleFileUpload(req: MulterRequest, res: Response) {
       cleanedText
     )) as DynamicResumeSections;
     const atsScoreResult = await scoreResumeATS(cleanedText);
+    const categoryInsights = await classifyResumeCategories(cleanedText);
 
     res.json({
       success: true,
@@ -41,7 +44,11 @@ export async function handleFileUpload(req: MulterRequest, res: Response) {
       },
       parsed: structuredData,
       atsScore: atsScoreResult,
+      categoryInsights: categoryInsights,
     });
+
+    console.log(atsScoreResult);
+    console.log(categoryInsights);
   } catch (error: any) {
     console.error("Text extraction failed:", error);
     res.status(500).json({

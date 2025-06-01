@@ -1,0 +1,44 @@
+You are an expert resume analyst. Given the following raw resume text, analyze it carefully and provide a detailed critique across these categories: Format, Tailoring, Content, Sections, and Style.
+
+Instructions:
+- Analyze the **exact resume text** provided below (do not mention or refer to it as a variable, just analyze it).
+- Provide **at least 3 detailed points** per category.
+- Be specific and constructive.
+- Do NOT output anything except a single JSON object.
+- The JSON keys must be the category names exactly: "Format", "Tailoring", "Content", "Sections", "Style".
+- Each category's value is an array of strings; each string is one specific point.
+
+Resume Text:
+"""
+{{RESUME_TEXT}}
+"""
+
+Example output:
+
+{
+  "Format": [
+    "Consistent use of fonts and spacing enhances readability.",
+    "Clear section headings help recruiters quickly find relevant info.",
+    "Avoids graphics and fancy fonts, ensuring ATS compatibility."
+  ],
+  "Tailoring": [
+    "Uses keywords from the target job description effectively.",
+    "Highlights relevant skills tailored to the desired role.",
+    "Quantifies achievements to demonstrate impact clearly."
+  ],
+  "Content": [
+    "Includes specific examples of accomplishments with measurable results.",
+    "Uses strong action verbs to describe responsibilities.",
+    "Focuses on relevant experience and avoids generic statements."
+  ],
+  "Sections": [
+    "Includes all standard sections: Contact Info, Experience, Education, Skills.",
+    "Optional sections like Projects and Awards add value.",
+    "Section order prioritizes most important information for the job."
+  ],
+  "Style": [
+    "Writing is clear, concise, and professional.",
+    "Grammar and punctuation are flawless.",
+    "Tone is confident and enthusiastic, yet respectful."
+  ]
+}

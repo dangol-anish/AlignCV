@@ -1,7 +1,12 @@
 "use client";
 
-import { AtsScoreType, DynamicResumeSections } from "@/types/resume";
+import {
+  AtsScoreType,
+  CategoryInsights,
+  DynamicResumeSections,
+} from "@/types/resume";
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
 
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -11,6 +16,9 @@ export default function UploadPage() {
     null
   );
   const [atsScore, setAtsScore] = useState<AtsScoreType>(null);
+  const [categoryInsights, setCategoryInsights] =
+    useState<CategoryInsights | null>(null);
+
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -33,7 +41,8 @@ export default function UploadPage() {
       setMessage("");
       setExtractedText("");
       setParsedData(null);
-      setAtsScore(null); // reset ATS score on new upload
+      setAtsScore(null);
+      setCategoryInsights(null);
       setIsLoading(true);
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, {
@@ -50,6 +59,7 @@ export default function UploadPage() {
       setExtractedText(data.file?.text || "");
       setParsedData(data?.parsed);
       setAtsScore(data?.atsScore ?? null);
+      setCategoryInsights(data?.categoryInsights ?? null);
       setMessage("File uploaded successfully!");
     } catch (error: any) {
       setMessage("Upload error: " + error.message);
@@ -101,7 +111,30 @@ export default function UploadPage() {
         <div className="mt-6 p-4 bg-yellow-100 rounded border border-yellow-300">
           <h2 className="text-lg font-semibold mb-2">ATS Readiness Score:</h2>
           <p className="text-xl font-bold text-yellow-800">{atsScore.score}%</p>
-          <p className="mt-2 text-sm text-yellow-900">{atsScore.explanation}</p>
+
+          <div className="mt-2 prose prose-sm text-yellow-900 max-w-none">
+            <ReactMarkdown>{atsScore.explanation}</ReactMarkdown>
+          </div>
+        </div>
+      )}
+
+      {categoryInsights && (
+        <div className="mt-6 p-4 bg-blue-50 rounded border border-blue-200">
+          <h2 className="text-lg font-semibold mb-2">
+            Resume Analysis by Categories:
+          </h2>
+          {Object.entries(categoryInsights).map(
+            ([category, feedback]: [string, string[]]) => (
+              <div key={category} className="mb-4">
+                <h3 className="text-md font-bold text-blue-800">{category}</h3>
+                <ul className="list-disc list-inside text-sm text-blue-900">
+                  {feedback.map((point: string, index: number) => (
+                    <li key={index}>{point}</li>
+                  ))}
+                </ul>
+              </div>
+            )
+          )}
         </div>
       )}
 

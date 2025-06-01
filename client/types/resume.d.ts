@@ -3,3 +3,7 @@ export interface DynamicResumeSections {
 }
 
 export type AtsScoreType = { score: number; explanation: string } | null;
+
+export type CategoryInsights = {
+  [category: string]: string[];
+};

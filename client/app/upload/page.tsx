@@ -1,6 +1,6 @@
 "use client";
 
-import { DynamicResumeSections } from "@/types/resume";
+import { AtsScoreType, DynamicResumeSections } from "@/types/resume";
 import { useState } from "react";
 
 export default function UploadPage() {
@@ -10,6 +10,8 @@ export default function UploadPage() {
   const [parsedData, setParsedData] = useState<DynamicResumeSections | null>(
     null
   );
+  const [atsScore, setAtsScore] = useState<AtsScoreType>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -31,6 +33,8 @@ export default function UploadPage() {
       setMessage("");
       setExtractedText("");
       setParsedData(null);
+      setAtsScore(null); // reset ATS score on new upload
+      setIsLoading(true);
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, {
         method: "POST",
@@ -45,9 +49,12 @@ export default function UploadPage() {
 
       setExtractedText(data.file?.text || "");
       setParsedData(data?.parsed);
+      setAtsScore(data?.atsScore ?? null);
       setMessage("File uploaded successfully!");
     } catch (error: any) {
       setMessage("Upload error: " + error.message);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -61,16 +68,42 @@ export default function UploadPage() {
           onChange={(e) => setFile(e.target.files?.[0] || null)}
           accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt,.rtf"
           className="mb-4"
+          disabled={isLoading}
         />
         <button
           type="submit"
           className="px-4 py-2 bg-blue-600 text-white rounded"
+          disabled={isLoading}
         >
-          Upload
+          {isLoading ? "Uploading..." : "Upload"}
         </button>
       </form>
 
-      {message && <p className="mt-4 text-red-600">{message}</p>}
+      {message && (
+        <p
+          className={`mt-4 ${
+            message.startsWith("Upload error")
+              ? "text-red-600"
+              : "text-green-600"
+          }`}
+        >
+          {message}
+        </p>
+      )}
+
+      {isLoading && (
+        <p className="mt-4 text-blue-600 font-semibold">
+          Processing your file...
+        </p>
+      )}
+
+      {atsScore && (
+        <div className="mt-6 p-4 bg-yellow-100 rounded border border-yellow-300">
+          <h2 className="text-lg font-semibold mb-2">ATS Readiness Score:</h2>
+          <p className="text-xl font-bold text-yellow-800">{atsScore.score}%</p>
+          <p className="mt-2 text-sm text-yellow-900">{atsScore.explanation}</p>
+        </div>
+      )}
 
       {extractedText && (
         <section className="mt-6 p-4 bg-gray-100 rounded">

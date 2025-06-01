@@ -1,0 +1,13 @@
+You're an AI expert trained to evaluate resumes for ATS (Applicant Tracking System) readiness.
+
+Analyze the following resume content and provide an estimated ATS score from 0 to 100, along with a brief explanation for the score.
+
+Criteria to consider:
+- Keyword richness
+- Formatting compatibility (plain text, no graphics/tables)
+- Presence of common sections (Skills, Experience, Education, etc.)
+- Readability and clarity
+- Chronological structure
+
+Resume:
+"""{{RESUME_CONTENT}}"""

@@ -8,6 +8,12 @@ import {
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 
+interface ResumeImprovement {
+  original: string;
+  issue: string;
+  suggestion: string;
+}
+
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [message, setMessage] = useState("");
@@ -18,7 +24,9 @@ export default function UploadPage() {
   const [atsScore, setAtsScore] = useState<AtsScoreType>(null);
   const [categoryInsights, setCategoryInsights] =
     useState<CategoryInsights | null>(null);
-
+  const [resumeImprovements, setResumeImprovements] = useState<
+    ResumeImprovement[]
+  >([]);
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -43,6 +51,7 @@ export default function UploadPage() {
       setParsedData(null);
       setAtsScore(null);
       setCategoryInsights(null);
+      setResumeImprovements([]); // Clear previous suggestions
       setIsLoading(true);
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, {
@@ -60,9 +69,24 @@ export default function UploadPage() {
       setParsedData(data?.parsed);
       setAtsScore(data?.atsScore ?? null);
       setCategoryInsights(data?.categoryInsights ?? null);
+
+      // Set the line-by-line resume improvement suggestions here:
+      setResumeImprovements(data?.lineImprovements ?? []);
+
       setMessage("File uploaded successfully!");
     } catch (error: any) {
-      setMessage("Upload error: " + error.message);
+      const rawMessage = error.message || "An unknown error occurred";
+
+      if (
+        rawMessage.includes("valid resume") ||
+        rawMessage.includes("Invalid Gemini response")
+      ) {
+        setMessage(
+          "The uploaded file doesn't seem to be a valid resume. Try a better-formatted file."
+        );
+      } else {
+        setMessage("An unknown error occurred");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -135,6 +159,27 @@ export default function UploadPage() {
               </div>
             )
           )}
+        </div>
+      )}
+
+      {/* Line-by-Line Suggestions */}
+      {resumeImprovements && resumeImprovements.length > 0 && (
+        <div className="mt-6 p-4 bg-red-50 rounded border border-red-200">
+          <h2 className="text-lg font-semibold mb-4">
+            Line-by-Line Suggestions
+          </h2>
+          {resumeImprovements.map(({ original, issue, suggestion }, idx) => (
+            <div key={idx} className="mb-4">
+              <p className="text-sm text-gray-600 mb-1">
+                <strong>Issue:</strong> {issue}
+              </p>
+              <p className="text-sm">
+                <span className="text-green-700 line-through">{original}</span>
+                <br />
+                <span className="text-red-700 font-semibold">{suggestion}</span>
+              </p>
+            </div>
+          ))}
         </div>
       )}
 

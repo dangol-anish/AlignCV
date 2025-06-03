@@ -7,7 +7,7 @@ export const getModel = () =>
 
 export async function generateContentWithRetry(
   prompt: string,
-  maxRetries = 3
+  maxRetries = 5
 ): Promise<string> {
   const model = getModel();
 
@@ -22,7 +22,7 @@ export async function generateContentWithRetry(
       }
 
       console.warn(`Gemini model overloaded. Retrying attempt ${attempt}...`);
-      await new Promise((resolve) => setTimeout(resolve, 1000 * attempt)); // backoff
+      await new Promise((resolve) => setTimeout(resolve, 2000 * attempt)); // increased backoff
     }
   }
 

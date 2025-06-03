@@ -62,31 +62,18 @@ export default function UploadPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data?.message || "Upload failed");
+        setMessage(data?.message || "Upload failed");
+        return;
       }
 
       setExtractedText(data.file?.text || "");
       setParsedData(data?.parsed);
       setAtsScore(data?.atsScore ?? null);
       setCategoryInsights(data?.categoryInsights ?? null);
-
-      // Set the line-by-line resume improvement suggestions here:
       setResumeImprovements(data?.lineImprovements ?? []);
-
       setMessage("File uploaded successfully!");
     } catch (error: any) {
-      const rawMessage = error.message || "An unknown error occurred";
-
-      if (
-        rawMessage.includes("valid resume") ||
-        rawMessage.includes("Invalid Gemini response")
-      ) {
-        setMessage(
-          "The uploaded file doesn't seem to be a valid resume. Try a better-formatted file."
-        );
-      } else {
-        setMessage("An unknown error occurred");
-      }
+      setMessage("An unknown error occurred");
     } finally {
       setIsLoading(false);
     }

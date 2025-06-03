@@ -1,0 +1,31 @@
+You are an expert resume analyst and coach. Given the following raw resume text, perform both of the following analyses and return a single JSON object with two keys: "categoryInsights" and "lineImprovements".
+
+1. categoryInsights: Analyze the resume across these categories: Format, Tailoring, Content, Sections, and Style. For each category, provide at least 3 specific, constructive points as an array of strings. The structure should be:
+{
+  "Format": ["point1", "point2", ...],
+  "Tailoring": [...],
+  "Content": [...],
+  "Sections": [...],
+  "Style": [...]
+}
+
+2. lineImprovements: Identify lines or bullet points in the resume that can be improved. For each, return:
+- the original line (exact as it appears),
+- a short explanation of what's wrong,
+- a revised version that is more clear, specific, and impactful.
+Return only improvements (skip lines that are already strong). The structure should be an array of objects:
+[
+  { "original": "...", "issue": "...", "suggestion": "..." },
+  ...
+]
+
+Respond ONLY in this JSON format:
+{
+  "categoryInsights": { ... },
+  "lineImprovements": [ ... ]
+}
+
+Resume Text:
+"""
+{{RESUME_TEXT}}
+""" 

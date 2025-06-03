@@ -6,16 +6,16 @@ import { parseResumeWithGemini } from "../../services/resumeParser";
 import { isSupportedMimeType } from "../../utils/isSupportedMimeType";
 import { DynamicResumeSections } from "../interfaces/resume";
 import { scoreResumeATS } from "../../services/atsScorer";
-import { classifyResumeCategories } from "../../services/categoryClassifier";
-import { getResumeLineImprovements } from "../../services/resumeImprovement";
-import { ResumeImprovement } from "../interfaces/resumeImprovement";
+import { analyzeResume } from "../../services/categoryClassifier";
 import { isLikelyResume } from "../../utils/isLikelyResume";
 
 export async function handleFileUpload(req: MulterRequest, res: Response) {
   if (!req.file) {
-    return res
-      .status(400)
-      .json({ success: false, message: "No file uploaded" });
+    return res.status(400).json({
+      success: false,
+      message: "No file uploaded.",
+      code: "NO_FILE",
+    });
   }
 
   const { originalname, mimetype, size, buffer } = req.file;
@@ -24,6 +24,7 @@ export async function handleFileUpload(req: MulterRequest, res: Response) {
     return res.status(400).json({
       success: false,
       message: `Unsupported file type: ${mimetype}`,
+      code: "UNSUPPORTED_TYPE",
     });
   }
 
@@ -31,49 +32,91 @@ export async function handleFileUpload(req: MulterRequest, res: Response) {
     const rawText = await extractTextFromBuffer(buffer, mimetype);
     const cleanedText = cleanExtractedText(rawText);
 
-    console.log("Text for isLikelyResume check:", cleanedText.slice(0, 1000));
-
     if (!isLikelyResume(cleanedText)) {
       return res.status(400).json({
         success: false,
         message:
           "The uploaded file doesn't seem to be a valid resume. Try a better-formatted file.",
+        code: "INVALID_RESUME",
       });
     }
 
-    const structuredData = (await parseResumeWithGemini(
-      cleanedText
-    )) as DynamicResumeSections;
-    const atsScoreResult = await scoreResumeATS(cleanedText);
-    const categoryInsights = await classifyResumeCategories(cleanedText);
+    let structuredData: DynamicResumeSections | null = null;
+    try {
+      structuredData = (await parseResumeWithGemini(
+        cleanedText
+      )) as DynamicResumeSections;
+    } catch (geminiError: any) {
+      console.error("Gemini parsing failed:", geminiError);
+      let userMessage = "Resume parsing failed. Please try again later.";
+      let code = "GEMINI_PARSE_ERROR";
+      if (geminiError.status === 503) {
+        userMessage =
+          "Our AI is currently overloaded. Please try again in a few minutes.";
+        code = "GEMINI_OVERLOADED";
+      } else if (
+        geminiError.message &&
+        geminiError.message.includes("Invalid Gemini response")
+      ) {
+        userMessage =
+          "The AI could not understand your resume. Try a different file or format.";
+        code = "GEMINI_INVALID_RESPONSE";
+      }
+      return res
+        .status(500)
+        .json({ success: false, message: userMessage, code });
+    }
 
-    const lineImprovements: ResumeImprovement[] =
-      await getResumeLineImprovements(cleanedText);
+    let atsScoreResult = null;
+    try {
+      atsScoreResult = await scoreResumeATS(cleanedText);
+    } catch (e) {
+      console.error("ATS scoring failed:", e);
+    }
 
-    res.json({
+    let categoryInsights = null;
+    let lineImprovements: any[] = [];
+    try {
+      const analysis = await analyzeResume(cleanedText);
+      categoryInsights = analysis.categoryInsights;
+      lineImprovements = analysis.lineImprovements;
+    } catch (e: any) {
+      console.error("Resume analysis failed:", e);
+      let userMessage = "Resume analysis failed. Please try again later.";
+      let code = "GEMINI_ANALYSIS_ERROR";
+      if (e.status === 503) {
+        userMessage =
+          "Our AI is currently overloaded. Please try again in a few minutes.";
+        code = "GEMINI_OVERLOADED";
+      } else if (
+        e.message &&
+        e.message.includes("Invalid analyzeResume response")
+      ) {
+        userMessage =
+          "The AI could not analyze your resume. Try a different file or format.";
+        code = "GEMINI_INVALID_RESPONSE";
+      }
+      return res
+        .status(500)
+        .json({ success: false, message: userMessage, code });
+    }
+
+    return res.json({
       success: true,
-      file: {
-        name: originalname,
-        type: mimetype,
-        size,
-        text: cleanedText,
-      },
+      file: { name: originalname, type: mimetype, size, text: cleanedText },
       parsed: structuredData,
       atsScore: atsScoreResult,
-      categoryInsights: categoryInsights,
+      categoryInsights,
       lineImprovements,
     });
-
-    console.log("ATS Score:", atsScoreResult);
-    console.log("Category Insights:", categoryInsights);
-    console.log("Line Improvements:", lineImprovements);
   } catch (error: any) {
-    console.error("Text extraction failed:", error);
-
-    res.status(500).json({
-      success: false,
-      message: error.message || "Unexpected error occurred",
-      details: error.stack,
-    });
+    console.error("Unexpected error in handleFileUpload:", error);
+    if (!res.headersSent) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error. Please try again later.",
+        code: "INTERNAL_ERROR",
+      });
+    }
   }
 }

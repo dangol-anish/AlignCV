@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
+import { supabase } from "../../database";
 
-export function authMiddleware(
+export async function authMiddleware(
   req: Request,
   res: Response,
   next: NextFunction
@@ -9,6 +10,15 @@ export function authMiddleware(
   if (!authHeader) {
     return res.status(401).json({ message: "Unauthorized" });
   }
-  // For now, allow all if header exists — extend with real auth later
+  const token = authHeader.replace("Bearer ", "");
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(token);
+  if (error || !user) {
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
+  // Attach user info to request
+  (req as any).user = { id: user.id };
   next();
 }

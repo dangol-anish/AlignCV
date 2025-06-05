@@ -1,122 +1,165 @@
 import { Response } from "express";
 import { MulterRequest } from "../interfaces/upload";
-import { extractTextFromBuffer } from "../../services/textExtractor";
-import { cleanExtractedText } from "../../services/textCleaner";
+import { supabase } from "../../database";
 import { parseResumeWithGemini } from "../../services/resumeParser";
-import { isSupportedMimeType } from "../../utils/isSupportedMimeType";
 import { DynamicResumeSections } from "../interfaces/resume";
 import { scoreResumeATS } from "../../services/atsScorer";
 import { analyzeResume } from "../../services/categoryClassifier";
-import { isLikelyResume } from "../../utils/isLikelyResume";
 
 export async function handleFileUpload(req: MulterRequest, res: Response) {
-  if (!req.file) {
-    return res.status(400).json({
-      success: false,
-      message: "No file uploaded.",
-      code: "NO_FILE",
-    });
-  }
+  // At this point, req.cleanedText is set by the validator middleware
+  const { originalname, mimetype, size } = req.file!;
+  const cleanedText = req.cleanedText!;
 
-  const { originalname, mimetype, size, buffer } = req.file;
-
-  if (!isSupportedMimeType(mimetype)) {
-    return res.status(400).json({
-      success: false,
-      message: `Unsupported file type: ${mimetype}`,
-      code: "UNSUPPORTED_TYPE",
-    });
-  }
-
+  let structuredData: DynamicResumeSections | null = null;
   try {
-    const rawText = await extractTextFromBuffer(buffer, mimetype);
-    const cleanedText = cleanExtractedText(rawText);
-
-    if (!isLikelyResume(cleanedText)) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "The uploaded file doesn't seem to be a valid resume. Try a better-formatted file.",
-        code: "INVALID_RESUME",
-      });
+    structuredData = (await parseResumeWithGemini(
+      cleanedText
+    )) as DynamicResumeSections;
+  } catch (geminiError: any) {
+    console.error("Gemini parsing failed:", geminiError);
+    let userMessage = "Resume parsing failed. Please try again later.";
+    let code = "GEMINI_PARSE_ERROR";
+    if (geminiError.status === 503) {
+      userMessage =
+        "Our AI is currently overloaded. Please try again in a few minutes.";
+      code = "GEMINI_OVERLOADED";
+    } else if (
+      geminiError.message &&
+      geminiError.message.includes("Invalid Gemini response")
+    ) {
+      userMessage =
+        "The AI could not understand your resume. Try a different file or format.";
+      code = "GEMINI_INVALID_RESPONSE";
     }
+    return res.status(500).json({ success: false, message: userMessage, code });
+  }
 
-    let structuredData: DynamicResumeSections | null = null;
-    try {
-      structuredData = (await parseResumeWithGemini(
-        cleanedText
-      )) as DynamicResumeSections;
-    } catch (geminiError: any) {
-      console.error("Gemini parsing failed:", geminiError);
-      let userMessage = "Resume parsing failed. Please try again later.";
-      let code = "GEMINI_PARSE_ERROR";
-      if (geminiError.status === 503) {
-        userMessage =
-          "Our AI is currently overloaded. Please try again in a few minutes.";
-        code = "GEMINI_OVERLOADED";
-      } else if (
-        geminiError.message &&
-        geminiError.message.includes("Invalid Gemini response")
-      ) {
-        userMessage =
-          "The AI could not understand your resume. Try a different file or format.";
-        code = "GEMINI_INVALID_RESPONSE";
-      }
-      return res
-        .status(500)
-        .json({ success: false, message: userMessage, code });
+  let atsScoreResult = null;
+  try {
+    atsScoreResult = await scoreResumeATS(cleanedText);
+  } catch (e) {
+    console.error("ATS scoring failed:", e);
+  }
+
+  let categoryInsights = null;
+  let lineImprovements: any[] = [];
+  try {
+    const analysis = await analyzeResume(cleanedText);
+    categoryInsights = analysis.categoryInsights;
+    lineImprovements = analysis.lineImprovements;
+  } catch (e: any) {
+    console.error("Resume analysis failed:", e);
+    let userMessage = "Resume analysis failed. Please try again later.";
+    let code = "GEMINI_ANALYSIS_ERROR";
+    if (e.status === 503) {
+      userMessage =
+        "Our AI is currently overloaded. Please try again in a few minutes.";
+      code = "GEMINI_OVERLOADED";
+    } else if (
+      e.message &&
+      e.message.includes("Invalid analyzeResume response")
+    ) {
+      userMessage =
+        "The AI could not analyze your resume. Try a different file or format.";
+      code = "GEMINI_INVALID_RESPONSE";
     }
+    return res.status(500).json({ success: false, message: userMessage, code });
+  }
 
-    let atsScoreResult = null;
-    try {
-      atsScoreResult = await scoreResumeATS(cleanedText);
-    } catch (e) {
-      console.error("ATS scoring failed:", e);
-    }
+  // Store in Supabase
+  try {
+    const userId = req.user?.id ?? null; // If you have auth middleware, otherwise null
+    // 1. Insert resume
+    const { data: resume, error: resumeError } = await supabase
+      .from("resumes")
+      .insert([
+        {
+          user_id: userId,
+          original_filename: originalname,
+          mimetype,
+          size,
+          raw_text: cleanedText,
+          parsed_data: structuredData,
+        },
+      ])
+      .select()
+      .single();
+    if (resumeError) throw resumeError;
 
-    let categoryInsights = null;
-    let lineImprovements: any[] = [];
-    try {
-      const analysis = await analyzeResume(cleanedText);
-      categoryInsights = analysis.categoryInsights;
-      lineImprovements = analysis.lineImprovements;
-    } catch (e: any) {
-      console.error("Resume analysis failed:", e);
-      let userMessage = "Resume analysis failed. Please try again later.";
-      let code = "GEMINI_ANALYSIS_ERROR";
-      if (e.status === 503) {
-        userMessage =
-          "Our AI is currently overloaded. Please try again in a few minutes.";
-        code = "GEMINI_OVERLOADED";
-      } else if (
-        e.message &&
-        e.message.includes("Invalid analyzeResume response")
-      ) {
-        userMessage =
-          "The AI could not analyze your resume. Try a different file or format.";
-        code = "GEMINI_INVALID_RESPONSE";
-      }
-      return res
-        .status(500)
-        .json({ success: false, message: userMessage, code });
-    }
-
-    return res.json({
-      success: true,
-      file: { name: originalname, type: mimetype, size, text: cleanedText },
-      parsed: structuredData,
-      atsScore: atsScoreResult,
-      categoryInsights,
-      lineImprovements,
+    // 2. Insert analysis
+    const { error: analysisError } = await supabase
+      .from("resume_analysis")
+      .insert([
+        {
+          resume_id: resume.id,
+          ats_score: atsScoreResult,
+          category_insights: categoryInsights,
+          line_improvements: lineImprovements,
+        },
+      ]);
+    if (analysisError) throw analysisError;
+  } catch (dbError: any) {
+    console.error("Supabase DB error:", dbError);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to store resume or analysis in database.",
+      code: "DB_ERROR",
     });
-  } catch (error: any) {
-    console.error("Unexpected error in handleFileUpload:", error);
-    if (!res.headersSent) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error. Please try again later.",
-        code: "INTERNAL_ERROR",
-      });
-    }
+  }
+
+  console.log("File info:", {
+    name: originalname,
+    type: mimetype,
+    size,
+    text: cleanedText,
+  });
+  console.log("Parsed resume data:", structuredData);
+  console.log("ATS score result:", atsScoreResult);
+  console.log("Category insights:", categoryInsights);
+  console.log("Line improvements:", lineImprovements);
+
+  return res.json({
+    success: true,
+    file: { name: originalname, type: mimetype, size, text: cleanedText },
+    parsed: structuredData,
+    atsScore: atsScoreResult,
+    categoryInsights,
+    lineImprovements,
+  });
+}
+
+export async function saveResumeEdit(req: MulterRequest, res: Response) {
+  // Require authentication
+  const userId = req.user?.id;
+  if (!userId) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+  const { resume_id, edited_data } = req.body;
+  if (!resume_id || !edited_data) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Missing resume_id or edited_data" });
+  }
+  try {
+    const { data, error } = await supabase
+      .from("resume_edits")
+      .insert([
+        {
+          resume_id,
+          user_id: userId,
+          edited_data,
+        },
+      ])
+      .select()
+      .single();
+    if (error) throw error;
+    return res.json({ success: true, edit: data });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to save resume edit",
+      error: err,
+    });
   }
 }

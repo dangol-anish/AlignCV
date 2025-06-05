@@ -7,6 +7,7 @@ import {
 } from "@/types/resume";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
+import { useRouter } from "next/navigation";
 
 interface ResumeImprovement {
   original: string;
@@ -28,6 +29,7 @@ export default function UploadPage() {
     ResumeImprovement[]
   >([]);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -167,6 +169,12 @@ export default function UploadPage() {
               </p>
             </div>
           ))}
+          <button
+            className="mt-6 px-4 py-2 bg-green-600 text-white rounded"
+            onClick={() => router.push("/dashboard/implement-improvements")}
+          >
+            Implement these improvements
+          </button>
         </div>
       )}
 

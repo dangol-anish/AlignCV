@@ -59,3 +59,4 @@ coverage/
 # Misc
 *.swp
 *~
+node_modules/

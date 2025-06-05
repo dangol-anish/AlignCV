@@ -15,7 +15,7 @@ export default function Dashboard() {
       supabase.auth.getUser().then(({ data }) => {
         setUser(data.user);
         if (!data.user) {
-          router.replace("/");
+          router.replace("/auth");
         }
       });
     }

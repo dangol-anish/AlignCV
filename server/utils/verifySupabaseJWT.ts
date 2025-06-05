@@ -1,4 +1,4 @@
-import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 
 const SUPABASE_JWT_SECRET = process.env.SUPABASE_JWT_SECRET!;
@@ -15,7 +15,7 @@ export function verifySupabaseJWT(
   jwt.verify(
     token,
     SUPABASE_JWT_SECRET,
-    (err: VerifyErrors | null, decoded: string | JwtPayload | undefined) => {
+    (err: Error | null, decoded: string | JwtPayload | undefined) => {
       if (err) return res.status(401).json({ error: "Invalid token" });
       (req as any).user = decoded;
       next();

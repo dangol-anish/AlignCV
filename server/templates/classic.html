@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Classic Resume</title>
+    <style>
+      body {
+        font-family: Times New Roman, serif;
+        margin: 40px;
+        background: #fff;
+      }
+      .header {
+        border-bottom: 1px solid #000;
+        margin-bottom: 20px;
+      }
+      .name {
+        font-size: 2em;
+        font-weight: bold;
+      }
+      .contact {
+        color: #333;
+        margin-bottom: 10px;
+      }
+      .section {
+        margin-top: 24px;
+      }
+      .section-title {
+        font-size: 1.1em;
+        color: #111;
+        font-weight: bold;
+        margin-bottom: 6px;
+      }
+      .item-title {
+        font-weight: bold;
+      }
+      .item-dates {
+        float: right;
+        color: #666;
+        font-size: 0.9em;
+      }
+      ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="name">{{name}}</div>
+      <div class="contact">{{contact}}</div>
+    </div>
+    {{#each sections}}
+    <div class="section">
+      <div class="section-title">{{heading}}</div>
+      {{#if (eq type "skills")}}
+      <ul>
+        {{#each content}}
+        <li>{{this}}</li>
+        {{/each}}
+      </ul>
+      {{else if (eq type "experience")}} {{#each content}}
+      <div class="item">
+        <span class="item-title">{{title}}</span>, {{company}}<span
+          class="item-dates"
+          >{{dates}}</span
+        ><br />
+        <div>{{description}}</div>
+      </div>
+      {{/each}} {{else if (eq type "education")}} {{#each content}}
+      <div class="item">
+        <span class="item-title">{{degree}}</span>, {{institution}}<span
+          class="item-dates"
+          >{{dates}}</span
+        ><br />
+      </div>
+      {{/each}} {{else}}
+      <div>{{content}}</div>
+      {{/if}}
+    </div>
+    {{/each}}
+  </body>
+</html>

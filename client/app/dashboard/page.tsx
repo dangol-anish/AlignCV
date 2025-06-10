@@ -12,6 +12,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!user) {
+      router.replace("/auth?redirect=/dashboard");
+    }
+  }, [user, router]);
+
+  useEffect(() => {
+    if (!user) {
       supabase.auth.getUser().then(({ data }) => {
         setUser(data.user);
         if (!data.user) {

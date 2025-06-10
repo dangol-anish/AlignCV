@@ -5,6 +5,9 @@ import { parseResumeWithGemini } from "../../services/resumeParser";
 import { DynamicResumeSections } from "../interfaces/resume";
 import { scoreResumeATS } from "../../services/atsScorer";
 import { analyzeResume } from "../../services/categoryClassifier";
+import { fillResumeTemplate } from "../../services/templateFiller";
+import { Request } from "express";
+import { htmlToPdf } from "../../services/pdfGenerator";
 
 export async function handleFileUpload(req: MulterRequest, res: Response) {
   // At this point, req.cleanedText is set by the validator middleware
@@ -161,5 +164,75 @@ export async function saveResumeEdit(req: MulterRequest, res: Response) {
       message: "Failed to save resume edit",
       error: err,
     });
+  }
+}
+
+export async function generateResume(req: Request, res: Response) {
+  try {
+    const { template, data } = req.body;
+    console.log("generateResume called with:", { template, data });
+    if (!template || !data) {
+      return res.status(400).json({ error: "Missing template or data" });
+    }
+    let html;
+    try {
+      console.log(
+        "[generateResume] Data to fillResumeTemplate:",
+        JSON.stringify(data, null, 2)
+      );
+      html = await fillResumeTemplate(template, data);
+      console.log("[generateResume] Successfully filled template");
+    } catch (fillErr: any) {
+      console.error(
+        "[generateResume] Error in fillResumeTemplate:",
+        fillErr,
+        fillErr?.stack
+      );
+      return res.status(500).json({
+        error: "Failed to fill template",
+        details: fillErr.message,
+        stack: fillErr.stack,
+      });
+    }
+    res.setHeader("Content-Type", "text/html");
+    return res.status(200).send(html);
+  } catch (err: any) {
+    console.error("[generateResume] Error generating resume:", err, err?.stack);
+    return res.status(500).json({
+      error: "Failed to generate resume",
+      details: err.message || err.toString(),
+      stack: err.stack,
+    });
+  }
+}
+
+export async function generateResumePdf(req: Request, res: Response) {
+  try {
+    const { template, data } = req.body;
+    if (!template || !data) {
+      return res.status(400).json({ error: "Missing template or data" });
+    }
+    let html;
+    try {
+      html = await fillResumeTemplate(template, data);
+    } catch (fillErr: any) {
+      return res
+        .status(500)
+        .json({ error: "Failed to fill template", details: fillErr.message });
+    }
+    try {
+      const pdfBuffer = await htmlToPdf(html);
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", "attachment; filename=resume.pdf");
+      return res.status(200).send(pdfBuffer);
+    } catch (pdfErr: any) {
+      return res
+        .status(500)
+        .json({ error: "Failed to generate PDF", details: pdfErr.message });
+    }
+  } catch (err: any) {
+    return res
+      .status(500)
+      .json({ error: "Failed to generate PDF", details: err.message });
   }
 }

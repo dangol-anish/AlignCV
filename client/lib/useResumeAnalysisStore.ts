@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import {
   AtsScoreType,
   CategoryInsights,
@@ -27,19 +28,28 @@ interface ResumeAnalysisState {
   clearResults: () => void;
 }
 
-export const useResumeAnalysisStore = create<ResumeAnalysisState>((set) => ({
-  extractedText: "",
-  parsedData: null,
-  atsScore: null,
-  categoryInsights: null,
-  resumeImprovements: [],
-  setResults: (data) => set({ ...data }),
-  clearResults: () =>
-    set({
+export const useResumeAnalysisStore = create(
+  persist<ResumeAnalysisState>(
+    (set) => ({
       extractedText: "",
       parsedData: null,
       atsScore: null,
       categoryInsights: null,
       resumeImprovements: [],
+      setResults: (data) => set({ ...data }),
+      clearResults: () =>
+        set({
+          extractedText: "",
+          parsedData: null,
+          atsScore: null,
+          categoryInsights: null,
+          resumeImprovements: [],
+        }),
     }),
-}));
+    {
+      name: "resume-analysis-store",
+    }
+  )
+) as unknown as import("zustand").UseBoundStore<
+  import("zustand").StoreApi<ResumeAnalysisState>
+>;

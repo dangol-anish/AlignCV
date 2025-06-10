@@ -57,6 +57,30 @@ export default function ResumeAnalysisPage() {
     router,
   ]);
 
+  useEffect(() => {
+    if (
+      extractedText &&
+      parsedData &&
+      atsScore &&
+      categoryInsights &&
+      resumeImprovements.length > 0
+    ) {
+      useResumeAnalysisStore.getState().setResults({
+        extractedText,
+        parsedData,
+        atsScore,
+        categoryInsights,
+        resumeImprovements,
+      });
+    }
+  }, [
+    extractedText,
+    parsedData,
+    atsScore,
+    categoryInsights,
+    resumeImprovements,
+  ]);
+
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-muted px-2">
       <Card className="w-full max-w-lg shadow-md border-none bg-white/90">

@@ -1,6 +1,16 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useUserStore } from "@/lib/useUserStore";
+import { useRouter } from "next/navigation";
 
 export default function ImplementImprovementsPage() {
+  const user = useUserStore((state) => state.user);
+  const router = useRouter();
+  useEffect(() => {
+    if (!user) {
+      router.replace("/auth?redirect=/dashboard/implement-improvements");
+    }
+  }, [user, router]);
+  if (!user) return null;
   return (
     <div className="max-w-md mx-auto p-8 text-center">
       <h1 className="text-2xl font-bold mb-4">Implement Improvements</h1>

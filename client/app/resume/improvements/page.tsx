@@ -29,7 +29,7 @@ export default function ResumeImprovementsPage() {
 
   useEffect(() => {
     if (!user) {
-      router.replace("/auth");
+      router.replace("/auth?redirect=/resume/improvements");
     }
   }, [user, router]);
 

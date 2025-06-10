@@ -7,7 +7,11 @@ import {
   validateResumeLikelihood,
 } from "../middlewares/uploadValidators";
 import { authMiddleware } from "../middlewares/authMiddleware";
-import { saveResumeEdit } from "../controllers/uploadController";
+import {
+  saveResumeEdit,
+  generateResume,
+  generateResumePdf,
+} from "../controllers/uploadController";
 
 const router = Router();
 
@@ -29,5 +33,9 @@ router.post(
 
 // Protected route for saving resume edits
 router.post("/edit", authMiddleware, saveResumeEdit);
+
+router.post("/generate", generateResume);
+
+router.post("/generate-pdf", generateResumePdf);
 
 export default router;

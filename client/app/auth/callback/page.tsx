@@ -10,9 +10,17 @@ export default function AuthCallback() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }: any) => {
-      setUser(data.user);
-      if (data.user) {
+    supabase.auth.getSession().then(({ data }) => {
+      const user = data?.session?.user;
+      const token = data?.session?.access_token;
+      if (user && token) {
+        setUser({
+          id: user.id,
+          email: user.email || "",
+          name: user.user_metadata?.name || "",
+          created_at: user.created_at || "",
+          token,
+        });
         const redirect = searchParams.get("redirect") || "/dashboard";
         router.push(redirect);
       }

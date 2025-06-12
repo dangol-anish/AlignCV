@@ -10,70 +10,12 @@ import { Request } from "express";
 import { htmlToPdf } from "../../services/pdfGenerator";
 
 export async function handleFileUpload(req: MulterRequest, res: Response) {
-  // At this point, req.cleanedText is set by the validator middleware
   const { originalname, mimetype, size } = req.file!;
   const cleanedText = req.cleanedText!;
 
-  let structuredData: DynamicResumeSections | null = null;
+  // Only validate and store the resume, no analysis or parsing
   try {
-    structuredData = (await parseResumeWithGemini(
-      cleanedText
-    )) as DynamicResumeSections;
-  } catch (geminiError: any) {
-    console.error("Gemini parsing failed:", geminiError);
-    let userMessage = "Resume parsing failed. Please try again later.";
-    let code = "GEMINI_PARSE_ERROR";
-    if (geminiError.status === 503) {
-      userMessage =
-        "Our AI is currently overloaded. Please try again in a few minutes.";
-      code = "GEMINI_OVERLOADED";
-    } else if (
-      geminiError.message &&
-      geminiError.message.includes("Invalid Gemini response")
-    ) {
-      userMessage =
-        "The AI could not understand your resume. Try a different file or format.";
-      code = "GEMINI_INVALID_RESPONSE";
-    }
-    return res.status(500).json({ success: false, message: userMessage, code });
-  }
-
-  let atsScoreResult = null;
-  try {
-    atsScoreResult = await scoreResumeATS(cleanedText);
-  } catch (e) {
-    console.error("ATS scoring failed:", e);
-  }
-
-  let categoryInsights = null;
-  let lineImprovements: any[] = [];
-  try {
-    const analysis = await analyzeResume(cleanedText);
-    categoryInsights = analysis.categoryInsights;
-    lineImprovements = analysis.lineImprovements;
-  } catch (e: any) {
-    console.error("Resume analysis failed:", e);
-    let userMessage = "Resume analysis failed. Please try again later.";
-    let code = "GEMINI_ANALYSIS_ERROR";
-    if (e.status === 503) {
-      userMessage =
-        "Our AI is currently overloaded. Please try again in a few minutes.";
-      code = "GEMINI_OVERLOADED";
-    } else if (
-      e.message &&
-      e.message.includes("Invalid analyzeResume response")
-    ) {
-      userMessage =
-        "The AI could not analyze your resume. Try a different file or format.";
-      code = "GEMINI_INVALID_RESPONSE";
-    }
-    return res.status(500).json({ success: false, message: userMessage, code });
-  }
-
-  // Store in Supabase
-  try {
-    const userId = req.user?.id ?? null; // If you have auth middleware, otherwise null
-    // 1. Insert resume
+    const userId = req.user?.id ?? null;
     const { data: resume, error: resumeError } = await supabase
       .from("resumes")
       .insert([
@@ -83,53 +25,20 @@ export async function handleFileUpload(req: MulterRequest, res: Response) {
           mimetype,
           size,
           raw_text: cleanedText,
-          parsed_data: structuredData,
         },
       ])
       .select()
       .single();
     if (resumeError) throw resumeError;
-
-    // 2. Insert analysis
-    const { error: analysisError } = await supabase
-      .from("resume_analysis")
-      .insert([
-        {
-          resume_id: resume.id,
-          ats_score: atsScoreResult,
-          category_insights: categoryInsights,
-          line_improvements: lineImprovements,
-        },
-      ]);
-    if (analysisError) throw analysisError;
+    return res.json({ success: true, resume });
   } catch (dbError: any) {
     console.error("Supabase DB error:", dbError);
     return res.status(500).json({
       success: false,
-      message: "Failed to store resume or analysis in database.",
+      message: "Failed to store resume in database.",
       code: "DB_ERROR",
     });
   }
-
-  console.log("File info:", {
-    name: originalname,
-    type: mimetype,
-    size,
-    text: cleanedText,
-  });
-  console.log("Parsed resume data:", structuredData);
-  console.log("ATS score result:", atsScoreResult);
-  console.log("Category insights:", categoryInsights);
-  console.log("Line improvements:", lineImprovements);
-
-  return res.json({
-    success: true,
-    file: { name: originalname, type: mimetype, size, text: cleanedText },
-    parsed: structuredData,
-    atsScore: atsScoreResult,
-    categoryInsights,
-    lineImprovements,
-  });
 }
 
 export async function saveResumeEdit(req: MulterRequest, res: Response) {

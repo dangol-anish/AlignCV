@@ -16,6 +16,9 @@ import { toast } from "sonner";
 import { Toaster } from "sonner";
 import { useUserStore } from "@/lib/useUserStore";
 import { supabase } from "@/lib/supabaseClient";
+import { fetchUserResumes } from "@/lib/api/resume";
+import type { IResume } from "../types/resume";
+import ResumeAnalysisResult from "@/components/ResumeAnalysisResult";
 
 interface ResumeImprovement {
   original: string;
@@ -59,59 +62,151 @@ export default function Home() {
   const user = useUserStore((state) => state.user);
   const clearUser = useUserStore((state) => state.clearUser);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  // New: For picking and analyzing stored resumes
+  const [userResumes, setUserResumes] = useState<IResume[]>([]);
+  const [selectedResumeId, setSelectedResumeId] = useState<string>("");
+  const [analyzeLoading, setAnalyzeLoading] = useState(false);
+  const [analyzeError, setAnalyzeError] = useState<string | null>(null);
+  const [analyzeResult, setAnalyzeResult] = useState<any>(null);
 
-    if (!file) {
-      setMessage("Please select a file first");
-      return;
-    }
+  useEffect(() => {
+    if (!user) return;
+    fetchUserResumes(user.token)
+      .then(setUserResumes)
+      .catch(() => setUserResumes([]));
+  }, [user]);
 
-    if (file.size > 2 * 1024 * 1024) {
-      setMessage("File size exceeds 2MB limit");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
+  // Unified handler for analyze/upload
+  async function handleAnalyzeOrUpload(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        setMessage("File size exceeds 2MB limit");
+        return;
+      }
       setMessage("");
       setExtractedText("");
       setParsedData(null);
       setAtsScore(null);
       setCategoryInsights(null);
-      setResumeImprovements([]); // Clear previous suggestions
+      setResumeImprovements([]);
       setIsLoading(true);
-
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setMessage(data?.message || "Upload failed");
-        toast.error(data?.message || "Upload failed");
+      try {
+        let resumeId = null;
+        // If logged in, upload and store resume for later
+        if (user) {
+          const formData = new FormData();
+          formData.append("file", file);
+          const res = await fetch("/api/upload", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+            body: formData,
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            setMessage(data?.message || "Upload failed");
+            toast.error(data?.message || "Upload failed");
+            setIsLoading(false);
+            return;
+          }
+          resumeId = data.resume?.id;
+        } else {
+          // If not logged in, just analyze the file (no storage)
+          const formData = new FormData();
+          formData.append("file", file);
+          const res = await fetch("/api/analyze", {
+            method: "POST",
+            body: formData,
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            setMessage(data?.message || "Analysis failed");
+            toast.error(data?.message || "Analysis failed");
+            setIsLoading(false);
+            return;
+          }
+          setResults({
+            extractedText: "",
+            parsedData: data?.parsed,
+            atsScore: data?.atsScore ?? null,
+            categoryInsights: data?.categoryInsights ?? null,
+            resumeImprovements: data?.lineImprovements ?? [],
+          });
+          setMessage("Resume analyzed successfully!");
+          setIsLoading(false);
+          router.push("/resume/analysis");
+          return;
+        }
+        // If logged in, analyze after storing
+        if (resumeId) {
+          const analyzeRes = await fetch("/api/analyze", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${user.token}`,
+            },
+            body: JSON.stringify({ resume_id: resumeId }),
+          });
+          const analyzeData = await analyzeRes.json();
+          if (!analyzeRes.ok) {
+            setMessage(analyzeData.message || "Failed to analyze resume");
+            toast.error(analyzeData.message || "Failed to analyze resume");
+            setIsLoading(false);
+            return;
+          }
+          setResults({
+            extractedText: "",
+            parsedData: analyzeData?.parsed,
+            atsScore: analyzeData?.atsScore ?? null,
+            categoryInsights: analyzeData?.categoryInsights ?? null,
+            resumeImprovements: analyzeData?.lineImprovements ?? [],
+          });
+          setMessage("File uploaded and analyzed successfully!");
+          router.push("/resume/analysis");
+        }
+      } catch (error: any) {
+        setMessage("An unknown error occurred");
+        toast.error("An unknown error occurred");
+      } finally {
+        setIsLoading(false);
+      }
+    } else if (selectedResumeId) {
+      if (!user) {
+        setAnalyzeError("You must be signed in.");
         return;
       }
-
-      setResults({
-        extractedText: data.file?.text || "",
-        parsedData: data?.parsed,
-        atsScore: data?.atsScore ?? null,
-        categoryInsights: data?.categoryInsights ?? null,
-        resumeImprovements: data?.lineImprovements ?? [],
-      });
-      setMessage("File uploaded successfully!");
-      router.push("/resume/analysis");
-      return;
-    } catch (error: any) {
-      setMessage("An unknown error occurred");
-      toast.error("An unknown error occurred");
-    } finally {
-      setIsLoading(false);
+      setAnalyzeLoading(true);
+      setAnalyzeError(null);
+      setAnalyzeResult(null);
+      try {
+        const res = await fetch("/api/analyze", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+          body: JSON.stringify({ resume_id: selectedResumeId }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setAnalyzeError(data.message || "Failed to analyze resume");
+          setAnalyzeLoading(false);
+          return;
+        }
+        setAnalyzeResult({
+          extractedText: "",
+          parsedData: data?.parsed,
+          atsScore: data?.atsScore ?? null,
+          categoryInsights: data?.categoryInsights ?? null,
+          resumeImprovements: data?.lineImprovements ?? [],
+        });
+      } catch (e: any) {
+        setAnalyzeError(e.message);
+      } finally {
+        setAnalyzeLoading(false);
+      }
     }
   }
 
@@ -140,25 +235,105 @@ export default function Home() {
           <>Not signed in</>
         )}
       </div>
-      <Card className="w-full max-w-lg shadow-md border-none bg-white/90">
+      <Card className="w-full max-w-lg shadow-md border-none bg-white/90 mb-8">
         <CardHeader>
           <CardTitle className="text-center text-2xl font-bold tracking-tight">
             Resume Analyzer
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <Input
-              type="file"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-              accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt,.rtf"
-              disabled={isLoading}
-              className="file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700"
-            />
-            <Button type="submit" disabled={isLoading} className="w-full">
-              {isLoading ? "Uploading..." : "Upload Resume"}
-            </Button>
-          </form>
+          {user && (
+            <div className="mb-6">
+              <div className="mb-2 font-semibold">
+                Analyze a stored resume or upload a new one:
+              </div>
+              <div className="flex gap-2 items-center">
+                <select
+                  className="border rounded px-2 py-1"
+                  value={selectedResumeId}
+                  onChange={(e) => setSelectedResumeId(e.target.value)}
+                  disabled={analyzeLoading || isLoading}
+                >
+                  <option value="">Select a resume</option>
+                  {userResumes.map((resume) => (
+                    <option key={resume.id} value={resume.id}>
+                      {resume.original_filename} (
+                      {new Date(resume.uploaded_at).toLocaleDateString()})
+                    </option>
+                  ))}
+                </select>
+                <Input
+                  type="file"
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt,.rtf"
+                  disabled={isLoading || analyzeLoading}
+                  className="file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700"
+                  style={{ maxWidth: 180 }}
+                />
+                <Button
+                  onClick={handleAnalyzeOrUpload}
+                  disabled={
+                    isLoading || analyzeLoading || (!file && !selectedResumeId)
+                  }
+                >
+                  {isLoading || analyzeLoading
+                    ? "Processing..."
+                    : file
+                    ? "Upload & Analyze"
+                    : "Analyze"}
+                </Button>
+              </div>
+              {analyzeError && (
+                <div className="text-red-600 mt-2">{analyzeError}</div>
+              )}
+              {analyzeResult && (
+                <ResumeAnalysisResult
+                  atsScore={analyzeResult.atsScore}
+                  categoryInsights={analyzeResult.categoryInsights}
+                  resumeImprovements={analyzeResult.resumeImprovements}
+                  extractedText={analyzeResult.extractedText}
+                  parsedData={analyzeResult.parsedData}
+                  user={user}
+                />
+              )}
+            </div>
+          )}
+          {!user && (
+            <div className="mb-6">
+              <div className="mb-2 font-semibold">
+                Upload a resume to analyze:
+              </div>
+              <div className="flex gap-2 items-center">
+                <Input
+                  type="file"
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt,.rtf"
+                  disabled={isLoading || analyzeLoading}
+                  className="file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700"
+                  style={{ maxWidth: 180 }}
+                />
+                <Button
+                  onClick={handleAnalyzeOrUpload}
+                  disabled={isLoading || analyzeLoading || !file}
+                >
+                  {isLoading ? "Processing..." : "Upload & Analyze"}
+                </Button>
+              </div>
+              {analyzeError && (
+                <div className="text-red-600 mt-2">{analyzeError}</div>
+              )}
+              {analyzeResult && (
+                <ResumeAnalysisResult
+                  atsScore={analyzeResult.atsScore}
+                  categoryInsights={analyzeResult.categoryInsights}
+                  resumeImprovements={analyzeResult.resumeImprovements}
+                  extractedText={analyzeResult.extractedText}
+                  parsedData={analyzeResult.parsedData}
+                  user={user}
+                />
+              )}
+            </div>
+          )}
           <div className="flex flex-col items-center gap-2 mt-6">
             <span className="text-xs text-muted-foreground">or</span>
             <GoogleSignInButton />

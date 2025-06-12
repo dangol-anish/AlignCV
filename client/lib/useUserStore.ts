@@ -1,9 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { IUser } from "@/types/user";
 
 interface UserState {
-  user: any;
-  setUser: (user: any) => void;
+  user: IUser | null; // user must include token
+  setUser: (user: IUser) => void;
   clearUser: () => void;
 }
 

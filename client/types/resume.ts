@@ -1,7 +1,3 @@
-export interface DynamicResumeSections {
-  [section: string]: string | string[] | object | object[];
-}
-
 export interface IResume {
   id: string;
   user_id: string | null;

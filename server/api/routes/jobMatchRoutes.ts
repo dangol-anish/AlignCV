@@ -1,20 +1,16 @@
 import { Router } from "express";
 import {
-  matchJob,
   getJobMatchesForUser,
   getJobMatchById,
-} from "../controllers/jobMatchingController";
+} from "../controllers/jobMatchController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router = Router();
 
-// POST /api/job-matching
-router.post("/", authMiddleware, matchJob);
-
-// GET /api/job-matching
+// Get all job matches for the authenticated user
 router.get("/", authMiddleware, getJobMatchesForUser);
 
-// GET /api/job-matching/:id
+// GET /api/job-match/:id - Get a single job match
 router.get("/:id", authMiddleware, getJobMatchById);
 
 export default router;

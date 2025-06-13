@@ -1,0 +1,33 @@
+You are an expert cover letter writer. Your task is to write a compelling cover letter based on the available information.
+
+RESUME INFORMATION:
+{{RESUME_TEXT}}
+
+JOB AND CONTEXT INFORMATION:
+{{JOB_DESCRIPTION}}
+
+Please write a professional cover letter that:
+1. Uses the actual information from the resume (name, address, phone, email, etc.)
+2. Uses today's date ({{CURRENT_DATE}})
+3. Shows enthusiasm for the role and company
+4. Demonstrates how the candidate's background aligns with the job requirements
+5. Maintains a professional tone while being engaging
+6. Is concise and well-structured
+
+The cover letter should be in a standard business letter format with:
+- Your actual contact information from the resume
+- Today's date
+- Proper greeting
+- Clear introduction
+- 2-3 body paragraphs
+- Strong closing
+- Professional sign-off
+
+IMPORTANT INSTRUCTIONS:
+1. DO NOT use placeholders like [Your Name], [Your Address], etc. Use the actual information from the resume.
+2. Use today's date ({{CURRENT_DATE}}) in the proper format (e.g., "March 19, 2024").
+3. If certain information is not available in the resume, you can omit those fields rather than using placeholders.
+4. Focus on the information that is provided and make reasonable assumptions where necessary.
+5. The goal is to create a compelling cover letter that highlights the candidate's strengths and enthusiasm for the role.
+
+Please format the response as a complete cover letter, ready to be used. Do not include any markdown formatting or special characters. 

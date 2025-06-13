@@ -108,12 +108,23 @@ export default function Home() {
           body: formData,
         });
 
-        if (!analyzeRes.ok) {
-          const errorData = await analyzeRes.json();
-          throw new Error(errorData.message || "Analysis failed");
+        let analyzeData;
+        try {
+          analyzeData = await analyzeRes.json();
+        } catch (e) {
+          analyzeData = {};
         }
 
-        const analyzeData = await analyzeRes.json();
+        if (!analyzeRes.ok) {
+          // Show detailed backend error if available
+          const backendError =
+            analyzeData?.error?.message ||
+            analyzeData?.message ||
+            "Analysis failed";
+          setMessage(backendError);
+          toast.error(backendError);
+          throw new Error(backendError);
+        }
 
         // If user is authenticated, store the resume
         if (user) {
@@ -166,9 +177,17 @@ export default function Home() {
           },
           body: JSON.stringify({ resume_id: selectedResumeId }),
         });
-        const data = await res.json();
+        let data;
+        try {
+          data = await res.json();
+        } catch (e) {
+          data = {};
+        }
         if (!res.ok) {
-          setAnalyzeError(data.message || "Failed to analyze resume");
+          // Show detailed backend error if available
+          const backendError =
+            data?.error?.message || data?.message || "Failed to analyze resume";
+          setAnalyzeError(backendError);
           setAnalyzeLoading(false);
           return;
         }

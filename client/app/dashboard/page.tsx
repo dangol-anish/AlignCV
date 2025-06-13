@@ -8,17 +8,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Dashboard() {
-  const user = useUserStore((state) => state.user);
-  const setUser = useUserStore((state) => state.setUser);
-  const clearUser = useUserStore((state) => state.clearUser);
-  const router = useRouter();
   const [analyses, setAnalyses] = useState<any[]>([]);
   const [jobMatches, setJobMatches] = useState<any[]>([]);
+  const [coverLetters, setCoverLetters] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const { user, clearUser } = useUserStore();
   const authLoading = useUserStore((state) => state.authLoading);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -32,7 +33,7 @@ export default function Dashboard() {
     setLoading(true);
     setError(null);
 
-    // Fetch both resume analyses and job matches
+    // Fetch resume analyses, job matches, and cover letters
     Promise.all([
       fetch("/api/resumes/analyses", {
         headers: { Authorization: `Bearer ${user.token}` },
@@ -40,8 +41,11 @@ export default function Dashboard() {
       fetch("/api/job-matching", {
         headers: { Authorization: `Bearer ${user.token}` },
       }).then((res) => res.json()),
+      fetch("/api/cover-letter", {
+        headers: { Authorization: `Bearer ${user.token}` },
+      }).then((res) => res.json()),
     ])
-      .then(([analysesData, jobMatchesData]) => {
+      .then(([analysesData, jobMatchesData, coverLettersData]) => {
         if (!analysesData.success) {
           throw new Error(analysesData.message || "Failed to fetch analyses");
         }
@@ -50,8 +54,14 @@ export default function Dashboard() {
             jobMatchesData.message || "Failed to fetch job matches"
           );
         }
+        if (!coverLettersData.success) {
+          throw new Error(
+            coverLettersData.message || "Failed to fetch cover letters"
+          );
+        }
         setAnalyses(analysesData.results || []);
-        setJobMatches(jobMatchesData.results || []);
+        setJobMatches(jobMatchesData.matches || []);
+        setCoverLetters(coverLettersData.results || []);
       })
       .catch((e) => {
         console.error("Error fetching data:", {
@@ -98,7 +108,8 @@ export default function Dashboard() {
             Loading your results...
           </h2>
           <p className="text-muted-foreground">
-            Please wait while we fetch your resume analyses and job matches.
+            Please wait while we fetch your resume analyses, job matches, and
+            cover letters.
           </p>
         </div>
       </div>
@@ -159,106 +170,85 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="space-y-6">
-                {analyses.map((analysis: any) => (
-                  <Card key={analysis.id} className="overflow-hidden">
-                    <CardHeader className="bg-muted/50">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <CardTitle className="text-lg">
-                            {analysis.resume_filename}
-                          </CardTitle>
-                          <p className="text-sm text-muted-foreground">
-                            Analyzed on{" "}
-                            {new Date(analysis.analyzed_at).toLocaleString()}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <Badge variant="outline" className="text-sm">
-                            ATS Score: {analysis.ats_score?.score}
-                          </Badge>
-                          <Button
-                            variant="outline"
-                            onClick={() =>
-                              router.push(
-                                `/resume/analysis?id=${analysis.resume_id}`
-                              )
-                            }
-                          >
-                            View Full Analysis
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-6">
-                      <div className="grid md:grid-cols-2 gap-6">
-                        <div>
-                          <h3 className="font-semibold mb-2">
-                            Category Insights
-                          </h3>
-                          <ScrollArea className="h-[200px] pr-4">
-                            {analysis.category_insights &&
-                              Object.entries(analysis.category_insights).map(
-                                ([cat, points]) => (
-                                  <div key={cat} className="mb-4">
-                                    <h4 className="font-medium text-sm mb-1">
-                                      {cat}
-                                    </h4>
-                                    <ul className="space-y-1">
-                                      {(points as string[]).map((p, i) => (
-                                        <li
-                                          key={i}
-                                          className="text-sm text-muted-foreground"
-                                        >
-                                          • {p}
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                )
-                              )}
-                          </ScrollArea>
-                        </div>
+                {analyses.map((resume: any) => {
+                  // Get the latest analysis
+                  const latestAnalysis = resume.analyses?.[0];
+                  if (!latestAnalysis) return null;
 
-                        <div>
-                          <h3 className="font-semibold mb-2">
-                            Line Improvements
-                          </h3>
-                          <ScrollArea className="h-[200px] pr-4">
-                            <div className="space-y-4">
-                              {analysis.line_improvements?.map(
-                                (imp: any, i: number) => (
-                                  <div key={i} className="space-y-2">
-                                    <p className="text-sm italic text-muted-foreground">
-                                      "{imp.original}"
-                                    </p>
-                                    <div className="space-y-1">
-                                      <p className="text-sm">
-                                        <span className="font-medium">
-                                          Issue:
-                                        </span>{" "}
-                                        {imp.issue}
-                                      </p>
-                                      <p className="text-sm text-green-700">
-                                        <span className="font-medium">
-                                          Suggestion:
-                                        </span>{" "}
-                                        {imp.suggestion}
-                                      </p>
-                                    </div>
-                                    {i <
-                                      analysis.line_improvements.length - 1 && (
-                                      <Separator className="my-2" />
-                                    )}
-                                  </div>
+                  return (
+                    <Card key={resume.resume_id} className="overflow-hidden">
+                      <CardHeader className="bg-muted/50">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <CardTitle className="text-lg">
+                              {resume.resume_filename}
+                            </CardTitle>
+                            <p className="text-sm text-muted-foreground">
+                              Analyzed on{" "}
+                              {new Date(
+                                latestAnalysis.analyzed_at
+                              ).toLocaleString()}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <Badge variant="outline" className="text-sm">
+                              ATS Score:{" "}
+                              {latestAnalysis.ats_score?.score || "N/A"}
+                            </Badge>
+                            <Button
+                              variant="outline"
+                              onClick={() =>
+                                router.push(
+                                  `/resume/analysis/${resume.resume_id}`
                                 )
-                              )}
-                            </div>
-                          </ScrollArea>
+                              }
+                            >
+                              View Full Analysis
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardHeader>
+                      <CardContent className="p-4">
+                        <div className="space-y-4">
+                          {latestAnalysis.category_insights && (
+                            <div className="text-sm">
+                              <h4 className="font-semibold mb-2">
+                                Key Insights:
+                              </h4>
+                              <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                                {Object.entries(
+                                  latestAnalysis.category_insights
+                                )
+                                  .slice(0, 3)
+                                  .map(([category, points]: [string, any]) => (
+                                    <li key={category} className="line-clamp-1">
+                                      {category}: {points[0]}
+                                    </li>
+                                  ))}
+                              </ul>
+                            </div>
+                          )}
+                          {latestAnalysis.line_improvements && (
+                            <div className="text-sm">
+                              <h4 className="font-semibold mb-2">
+                                Top Improvements:
+                              </h4>
+                              <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                                {latestAnalysis.line_improvements
+                                  .slice(0, 3)
+                                  .map((imp: any, index: number) => (
+                                    <li key={index} className="line-clamp-1">
+                                      {imp.suggestion}
+                                    </li>
+                                  ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </CardContent>
@@ -319,6 +309,96 @@ export default function Dashboard() {
                             )}
                           </div>
                         </div>
+                      </div>
+                    </CardContent>
+                    <CardHeader className="bg-muted/50">
+                      <div className="flex justify-between items-center">
+                        <Button
+                          variant="outline"
+                          onClick={() =>
+                            router.push(`/job-matching/${match.id}`)
+                          }
+                        >
+                          View Full Match
+                        </Button>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Cover Letters Section */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Cover Letters</CardTitle>
+            <Button
+              variant="outline"
+              onClick={() => router.push("/cover-letter")}
+            >
+              Generate New
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {coverLetters.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No cover letters found. Generate a cover letter to get started.
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {coverLetters.map((letter: any) => (
+                  <Card key={letter.id} className="overflow-hidden">
+                    <CardHeader className="bg-muted/50">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-1">
+                          <CardTitle className="text-lg">
+                            {letter.job_title || "Untitled Cover Letter"}
+                          </CardTitle>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span>
+                              Generated on{" "}
+                              {new Date(letter.created_at).toLocaleString()}
+                            </span>
+                            {letter.resume_filename && (
+                              <>
+                                <span>•</span>
+                                <span>Based on: {letter.resume_filename}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              navigator.clipboard.writeText(
+                                letter.cover_letter
+                              );
+                              toast({
+                                title: "Copied!",
+                                description: "Cover letter copied to clipboard",
+                              });
+                            }}
+                          >
+                            Copy
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() =>
+                              router.push(`/cover-letter/${letter.id}`)
+                            }
+                          >
+                            View Full Letter
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-4">
+                      <div className="text-sm text-muted-foreground line-clamp-3">
+                        {letter.cover_letter}
                       </div>
                     </CardContent>
                   </Card>

@@ -1,4 +1,3 @@
-import { IUser } from "../../types/user";
 import { IResume } from "@/types/resume";
 
 export async function fetchUserResumes(token: string): Promise<IResume[]> {

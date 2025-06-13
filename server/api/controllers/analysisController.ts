@@ -23,10 +23,22 @@ export async function analyzeResumeById(req: Request, res: Response) {
   }
   try {
     // Parse and analyze
+    console.log("Starting resume analysis for ID:", resume_id);
+
+    console.log("Step 1: Parsing resume with Gemini");
     const parsedData = await parseResumeWithGemini(resume.raw_text);
+    console.log("Resume parsing completed");
+
+    console.log("Step 2: Scoring resume with ATS");
     const atsScoreResult = await scoreResumeATS(resume.raw_text);
+    console.log("ATS scoring completed");
+
+    console.log("Step 3: Analyzing resume categories");
     const analysis = await analyzeResume(resume.raw_text);
+    console.log("Category analysis completed");
+
     // Store analysis
+    console.log("Step 4: Storing analysis results");
     const { data: analysisRow, error: analysisError } = await supabase
       .from("resume_analysis")
       .insert([
@@ -40,6 +52,8 @@ export async function analyzeResumeById(req: Request, res: Response) {
       .select()
       .single();
     if (analysisError) throw analysisError;
+
+    console.log("Analysis completed successfully");
     return res.json({
       success: true,
       parsed: parsedData,
@@ -48,11 +62,33 @@ export async function analyzeResumeById(req: Request, res: Response) {
       lineImprovements: analysis.lineImprovements,
       analysis: analysisRow,
     });
-  } catch (err) {
+  } catch (err: any) {
+    console.error("Detailed error in analyzeResumeById:", {
+      error: err,
+      message: err.message,
+      stack: err.stack,
+      code: err.code,
+      details: err.details,
+    });
+
+    // Determine the specific error type
+    let errorMessage = "Failed to analyze resume";
+    if (err.message?.includes("quota") || err.message?.includes("limit")) {
+      errorMessage = "API quota exceeded. Please try again later.";
+    } else if (err.message?.includes("invalid")) {
+      errorMessage = "Invalid resume format or content";
+    } else if (err.message?.includes("timeout")) {
+      errorMessage = "Request timed out. Please try again.";
+    }
+
     return res.status(500).json({
       success: false,
-      message: "Failed to analyze resume",
-      error: err,
+      message: errorMessage,
+      error: {
+        message: err.message,
+        code: err.code,
+        details: err.details,
+      },
     });
   }
 }

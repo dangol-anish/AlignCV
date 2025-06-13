@@ -6,7 +6,11 @@
     "rootDir": "./",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "*": ["*"]
+    }
   },
   "include": ["./**/*.ts"],
   "exclude": ["node_modules"]

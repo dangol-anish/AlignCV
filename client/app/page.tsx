@@ -92,89 +92,66 @@ export default function Home() {
       setResumeImprovements([]);
       setIsLoading(true);
       try {
-        let resumeId = null;
-        // If logged in, upload and store resume for later
+        const formData = new FormData();
+        formData.append("file", file);
+
+        // If user is authenticated, include auth token
+        const headers: HeadersInit = {};
         if (user) {
-          const formData = new FormData();
-          formData.append("file", file);
-          const res = await fetch("/api/upload", {
+          headers.Authorization = `Bearer ${user.token}`;
+        }
+
+        // First analyze the resume
+        const analyzeRes = await fetch("/api/analyze", {
+          method: "POST",
+          headers,
+          body: formData,
+        });
+
+        if (!analyzeRes.ok) {
+          const errorData = await analyzeRes.json();
+          throw new Error(errorData.message || "Analysis failed");
+        }
+
+        const analyzeData = await analyzeRes.json();
+
+        // If user is authenticated, store the resume
+        if (user) {
+          const storeRes = await fetch("/api/upload", {
             method: "POST",
             headers: {
               Authorization: `Bearer ${user.token}`,
             },
             body: formData,
           });
-          const data = await res.json();
-          if (!res.ok) {
-            setMessage(data?.message || "Upload failed");
-            toast.error(data?.message || "Upload failed");
-            setIsLoading(false);
-            return;
+
+          if (!storeRes.ok) {
+            const errorData = await storeRes.json();
+            throw new Error(errorData.message || "Failed to store resume");
           }
-          resumeId = data.resume?.id;
-        } else {
-          // If not logged in, just analyze the file (no storage)
-          const formData = new FormData();
-          formData.append("file", file);
-          const res = await fetch("/api/analyze", {
-            method: "POST",
-            body: formData,
-          });
-          const data = await res.json();
-          if (!res.ok) {
-            setMessage(data?.message || "Analysis failed");
-            toast.error(data?.message || "Analysis failed");
-            setIsLoading(false);
-            return;
-          }
-          setResults({
-            extractedText: "",
-            parsedData: data?.parsed,
-            atsScore: data?.atsScore ?? null,
-            categoryInsights: data?.categoryInsights ?? null,
-            resumeImprovements: data?.lineImprovements ?? [],
-          });
-          setMessage("Resume analyzed successfully!");
-          setIsLoading(false);
-          router.push("/resume/analysis");
-          return;
         }
-        // If logged in, analyze after storing
-        if (resumeId) {
-          const analyzeRes = await fetch("/api/analyze", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
-            },
-            body: JSON.stringify({ resume_id: resumeId }),
-          });
-          const analyzeData = await analyzeRes.json();
-          if (!analyzeRes.ok) {
-            setMessage(analyzeData.message || "Failed to analyze resume");
-            toast.error(analyzeData.message || "Failed to analyze resume");
-            setIsLoading(false);
-            return;
-          }
-          setResults({
-            extractedText: "",
-            parsedData: analyzeData?.parsed,
-            atsScore: analyzeData?.atsScore ?? null,
-            categoryInsights: analyzeData?.categoryInsights ?? null,
-            resumeImprovements: analyzeData?.lineImprovements ?? [],
-          });
-          setMessage("File uploaded and analyzed successfully!");
-          router.push("/resume/analysis");
-        }
+
+        // Set results and redirect
+        setResults({
+          extractedText: "",
+          parsedData: analyzeData?.parsed,
+          atsScore: analyzeData?.atsScore ?? null,
+          categoryInsights: analyzeData?.categoryInsights ?? null,
+          resumeImprovements: analyzeData?.lineImprovements ?? [],
+        });
+
+        setMessage("Resume analyzed successfully!");
+        router.push("/resume/analysis");
       } catch (error: any) {
-        setMessage("An unknown error occurred");
-        toast.error("An unknown error occurred");
+        console.error("Error:", error);
+        setMessage(error.message || "An unknown error occurred");
+        toast.error(error.message || "An unknown error occurred");
       } finally {
         setIsLoading(false);
       }
     } else if (selectedResumeId) {
       if (!user) {
-        setAnalyzeError("You must be signed in.");
+        setAnalyzeError("You must be signed in to analyze stored resumes.");
         return;
       }
       setAnalyzeLoading(true);

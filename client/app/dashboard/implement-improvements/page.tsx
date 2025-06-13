@@ -5,11 +5,15 @@ import { useRouter } from "next/navigation";
 export default function ImplementImprovementsPage() {
   const user = useUserStore((state) => state.user);
   const router = useRouter();
+  const authLoading = useUserStore((state) => state.authLoading);
+
   useEffect(() => {
-    if (!user) {
+    if (!authLoading && !user) {
       router.replace("/auth?redirect=/dashboard/implement-improvements");
     }
-  }, [user, router]);
+  }, [authLoading, user, router]);
+
+  if (authLoading) return <div>Loading...</div>;
   if (!user) return null;
   return (
     <div className="max-w-md mx-auto p-8 text-center">

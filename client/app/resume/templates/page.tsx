@@ -14,6 +14,7 @@ export default function ResumeTemplatesPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [previewHtml, setPreviewHtml] = useState<string | null>(null);
+  const authLoading = useUserStore((state) => state.authLoading);
 
   const TEMPLATES = [
     { key: "modern", label: "Modern" },
@@ -22,11 +23,12 @@ export default function ResumeTemplatesPage() {
   ];
 
   useEffect(() => {
-    if (!user) {
+    if (!authLoading && !user) {
       router.replace("/auth?redirect=/resume/templates");
     }
-  }, [user, router]);
+  }, [authLoading, user, router]);
 
+  if (authLoading) return <div>Loading...</div>;
   if (!user) return null;
 
   // Strictly apply improvements: replace any string field that exactly matches an 'original' in improvements with its 'suggestion'.

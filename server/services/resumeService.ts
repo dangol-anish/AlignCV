@@ -45,3 +45,30 @@ export async function getResumeWithAnalysis(resumeId: string, userId: string) {
   if (error && error.code !== "PGRST116") throw error;
   return { resume, analysis };
 }
+
+export async function getResumeAnalysesForUser(userId: string) {
+  // Get all resumes for the user
+  const { data: resumes, error: resumesError } = await supabase
+    .from(RESUMES_TABLE)
+    .select("id, original_filename, uploaded_at")
+    .eq("user_id", userId);
+  if (resumesError) throw resumesError;
+  if (!resumes) return [];
+  // For each resume, get all analyses
+  const analyses = [];
+  for (const resume of resumes) {
+    const { data: analysisRows, error: analysisError } = await supabase
+      .from("resume_analysis")
+      .select("*")
+      .eq("resume_id", resume.id)
+      .order("analyzed_at", { ascending: false });
+    if (analysisError) throw analysisError;
+    analyses.push({
+      resume_id: resume.id,
+      resume_filename: resume.original_filename,
+      uploaded_at: resume.uploaded_at,
+      analyses: analysisRows || [],
+    });
+  }
+  return analyses;
+}

@@ -1,0 +1,21 @@
+You are an expert career coach and job matching assistant.
+
+Given the following resume and job description, analyze how well the resume matches the job. Provide:
+- A match score (0-100)
+- Key strengths (where the resume aligns well)
+- Key gaps (where the resume is lacking)
+- Actionable suggestions to improve the resume for this job
+
+Respond in this JSON format:
+{
+  "match_score": 0-100,
+  "strengths": [ ... ],
+  "gaps": [ ... ],
+  "suggestions": [ ... ]
+}
+
+Resume:
+"""{{RESUME_TEXT}}"""
+
+Job Description:
+"""{{JOB_DESCRIPTION}}""" 

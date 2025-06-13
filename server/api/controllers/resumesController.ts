@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import * as resumeService from "../../services/resumeService";
+import { getResumeAnalysesForUser } from "../../services/resumeService";
 
 export async function getUserResumes(req: Request, res: Response) {
   const userId = (req as any).user?.id;
@@ -60,6 +61,23 @@ export async function referenceResumeForFeature(req: Request, res: Response) {
     return res.status(500).json({
       success: false,
       message: "Failed to reference resume",
+      error: err,
+    });
+  }
+}
+
+export async function getAllResumeAnalysesForUser(req: Request, res: Response) {
+  const userId = (req as any).user?.id;
+  if (!userId) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+  try {
+    const results = await getResumeAnalysesForUser(userId);
+    return res.json({ success: true, results });
+  } catch (err: any) {
+    return res.status(500).json({
+      success: false,
+      message: err.message || "Failed to fetch resume analyses",
       error: err,
     });
   }

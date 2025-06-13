@@ -8,3 +8,16 @@ export interface IResume {
   parsed_data?: any;
   uploaded_at: string;
 }
+
+export type AtsScoreType = {
+  score: number;
+  feedback: string[];
+} | null;
+
+export type CategoryInsights = {
+  [key: string]: string[];
+} | null;
+
+export type DynamicResumeSections = {
+  [key: string]: any;
+} | null;

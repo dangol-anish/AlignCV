@@ -9,13 +9,26 @@ export default function ClientRoot({
   children: React.ReactNode;
 }) {
   const setUser = useUserStore((state) => state.setUser);
+  const clearUser = useUserStore((state) => state.clearUser);
+  const setAuthLoading = useUserStore((state) => state.setAuthLoading);
+
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data?.user) {
-        setUser(data.user);
+    setAuthLoading(true);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email || "",
+          name: session.user.user_metadata?.name || "",
+          created_at: session.user.created_at,
+          token: session.access_token,
+        });
+      } else {
+        clearUser();
       }
+      setAuthLoading(false);
     });
-    // Optionally, you could clearUser if no user, but persistence handles logout
-  }, [setUser]);
+  }, [setUser, clearUser, setAuthLoading]);
+
   return <>{children}</>;
 }

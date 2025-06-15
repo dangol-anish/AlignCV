@@ -209,52 +209,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen flex flex-col bg-zinc-950 px-16">
-      <nav className="w-full  flex items-center justify-between gap-2 text-[18px] text-zinc-500 h-20">
-        <h1 className="text-2xl font-bold text-blue-400">AlignCV</h1>
-
-        <ul className="flex space-x-6">
-          {navItems.map((item, index) => (
-            <li key={index}>
-              <Link
-                href={item.path}
-                className="tracking-wider hover:text-blue-400"
-              >
-                {item.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-        {user ? (
-          <>
-            <span>
-              Signed in as
-              <span className="font-semibold">{user.email || "User"}</span>
-            </span>
-            {/*} logout button func
-              <button
-                className="ml-2 px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 text-xs font-medium"
-                onClick={async () => {
-                  await supabase.auth.signOut();
-                  clearUser();
-                  toast.success("Signed out successfully");
-                }}
-              >
-                Log out
-              </button>
-
-              */}
-          </>
-        ) : (
-          <Link
-            href="/login"
-            className="text-white text-lg font-semibold flex items-center gap-2 hover:bg-slate-900 px-3 py-2 rounded-md"
-          >
-            <LogInIcon />
-            <p>Login</p>
-          </Link>
-        )}
-      </nav>
-
       {/* User sign-in status indicator and logout button */}
       <div className="mb-4 w-full max-w-lg flex items-center justify-end gap-2 text-xs text-gray-600"></div>
       <Card className="w-full max-w-lg shadow-md border-none bg-white/90 mb-8">

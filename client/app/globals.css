@@ -120,3 +120,15 @@
     @apply bg-background text-foreground;
   }
 }
+
+:root {
+  --royal-blue: #4169e1;
+}
+
+.text-royal-blue {
+  color: var(--royal-blue);
+}
+
+.bg-royal-blue {
+  background-color: var(--royal-blue);
+}

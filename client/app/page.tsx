@@ -20,6 +20,7 @@ import type { IResume } from "../types/resume";
 import { navItems } from "./constants/NavItems";
 import Link from "next/link";
 import { LogInIcon, Upload, FileText, CheckCircle } from "lucide-react";
+import { OnlineBadge } from "@/components/ui/online-badge";
 
 interface ResumeImprovement {
   original: string;
@@ -209,6 +210,7 @@ export default function Home() {
 
   return (
     <div className="max-w-7xl mx-auto">
+      <OnlineBadge />
       {/* Hero Section */}
       <div className="text-center mb-16">
         <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent">

@@ -26,9 +26,9 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-stone-950">
       {/* Navigation Bar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-zinc-950 border-b border-zinc-800">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-stone-950 border-b-[0.2px] border-zinc-800">
         <div className="relative">
           {/* Sidebar Toggle Button - Leftmost */}
           {user && (
@@ -40,9 +40,9 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
                 className="text-blue-500 hover:text-blue-400 border-zinc-800"
               >
                 {isOpen ? (
-                  <PanelRightClose className="h-5 w-5" />
-                ) : (
                   <PanelRightOpen className="h-5 w-5" />
+                ) : (
+                  <PanelRightClose className="h-5 w-5" />
                 )}
               </Button>
             </div>

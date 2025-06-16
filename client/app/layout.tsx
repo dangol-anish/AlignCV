@@ -1,17 +1,14 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import ClientRoot from "@/components/ClientRoot";
 import { ClientLayout } from "@/components/layout/ClientLayout";
 
-const geistSans = Geist({
-  subsets: ["latin"],
-  display: "swap",
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "AlignCV",
-  description: "AI-Powered CV Analysis and Optimization",
+  description: "AI-powered career companion",
 };
 
 export default function RootLayout({
@@ -20,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={geistSans.className}>
+    <html lang="en" className={inter.className}>
       <body>
         <ClientRoot>
           <ClientLayout>{children}</ClientLayout>

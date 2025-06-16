@@ -19,7 +19,7 @@ import { toast, Toaster } from "sonner";
 import type { IResume } from "../types/resume";
 import { navItems } from "./constants/NavItems";
 import Link from "next/link";
-import { LogInIcon } from "lucide-react";
+import { LogInIcon, Upload, FileText, CheckCircle } from "lucide-react";
 
 interface ResumeImprovement {
   original: string;
@@ -208,24 +208,65 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col bg-zinc-950 px-16">
-      {/* User sign-in status indicator and logout button */}
-      <div className="mb-4 w-full max-w-lg flex items-center justify-end gap-2 text-xs text-gray-600"></div>
-      <Card className="w-full max-w-lg shadow-md border-none bg-white/90 mb-8">
+    <div className="max-w-7xl mx-auto">
+      {/* Hero Section */}
+      <div className="text-center mb-16">
+        <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent">
+          Optimize Your Resume for Success
+        </h1>
+        <p className="text-xl text-zinc-400 mb-8">
+          Get AI-powered analysis, ATS optimization, and personalized
+          improvements
+        </p>
+      </div>
+
+      {/* Features Grid */}
+      <div className="grid md:grid-cols-3 gap-8 mb-16">
+        <Card className="bg-zinc-900 border-zinc-800">
+          <CardContent className="p-6">
+            <Upload className="h-12 w-12 text-blue-500 mb-4" />
+            <h3 className="text-xl font-semibold mb-2">Upload Resume</h3>
+            <p className="text-zinc-400">
+              Upload your resume in any format and get instant analysis
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="bg-zinc-900 border-zinc-800">
+          <CardContent className="p-6">
+            <FileText className="h-12 w-12 text-blue-500 mb-4" />
+            <h3 className="text-xl font-semibold mb-2">ATS Optimization</h3>
+            <p className="text-zinc-400">
+              Get your resume optimized for Applicant Tracking Systems
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="bg-zinc-900 border-zinc-800">
+          <CardContent className="p-6">
+            <CheckCircle className="h-12 w-12 text-blue-500 mb-4" />
+            <h3 className="text-xl font-semibold mb-2">Smart Improvements</h3>
+            <p className="text-zinc-400">
+              Receive personalized suggestions to enhance your resume
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Resume Analysis Section */}
+      <Card className="bg-zinc-900 border-zinc-800">
         <CardHeader>
-          <CardTitle className="text-center text-2xl font-bold tracking-tight">
+          <CardTitle className="text-2xl font-bold tracking-tight text-center">
             Resume Analyzer
           </CardTitle>
         </CardHeader>
         <CardContent>
           {user && (
             <div className="mb-6">
-              <div className="mb-2 font-semibold">
+              <div className="mb-2 font-semibold text-zinc-300">
                 Analyze a stored resume or upload a new one:
               </div>
               <div className="flex gap-2 items-center">
                 <select
-                  className="border rounded px-2 py-1"
+                  className="border rounded px-2 py-1 bg-zinc-800 text-zinc-100 border-zinc-700"
                   value={selectedResumeId}
                   onChange={(e) => setSelectedResumeId(e.target.value)}
                   disabled={analyzeLoading || isLoading}
@@ -243,73 +284,41 @@ export default function Home() {
                   onChange={(e) => setFile(e.target.files?.[0] || null)}
                   accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt,.rtf"
                   disabled={isLoading || analyzeLoading}
-                  className="file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700"
+                  className="file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-500 file:text-white hover:file:bg-blue-600"
                   style={{ maxWidth: 180 }}
                 />
-                <Button
-                  onClick={handleAnalyzeOrUpload}
-                  disabled={
-                    isLoading || analyzeLoading || (!file && !selectedResumeId)
-                  }
-                >
-                  {isLoading || analyzeLoading
-                    ? "Processing..."
-                    : file
-                    ? "Upload & Analyze"
-                    : "Analyze"}
-                </Button>
               </div>
-              {analyzeError && (
-                <div className="text-red-600 mt-2">{analyzeError}</div>
-              )}
-              {analyzeResult && (
-                <ResumeAnalysisResult
-                  atsScore={analyzeResult.atsScore}
-                  categoryInsights={analyzeResult.categoryInsights}
-                  resumeImprovements={analyzeResult.resumeImprovements}
-                  extractedText={analyzeResult.extractedText}
-                  parsedData={analyzeResult.parsedData}
-                  user={user}
-                />
-              )}
             </div>
           )}
+
           {!user && (
-            <div className="mb-6">
-              <div className="mb-2 font-semibold">
-                Upload a resume to analyze:
-              </div>
-              <div className="flex gap-2 items-center">
-                <Input
-                  type="file"
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
-                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt,.rtf"
-                  disabled={isLoading || analyzeLoading}
-                  className="file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700"
-                  style={{ maxWidth: 180 }}
-                />
-                <Button
-                  onClick={handleAnalyzeOrUpload}
-                  disabled={isLoading || analyzeLoading || !file}
-                >
-                  {isLoading ? "Processing..." : "Upload & Analyze"}
+            <div className="text-center mb-6">
+              <p className="text-zinc-400 mb-4">
+                Sign in to analyze your resume and get personalized improvements
+              </p>
+              <Link href="/auth">
+                <Button className="bg-blue-500 hover:bg-blue-600">
+                  <LogInIcon className="w-4 h-4 mr-2" />
+                  Sign In
                 </Button>
-              </div>
-              {analyzeError && (
-                <div className="text-red-600 mt-2">{analyzeError}</div>
-              )}
-              {analyzeResult && (
-                <ResumeAnalysisResult
-                  atsScore={analyzeResult.atsScore}
-                  categoryInsights={analyzeResult.categoryInsights}
-                  resumeImprovements={analyzeResult.resumeImprovements}
-                  extractedText={analyzeResult.extractedText}
-                  parsedData={analyzeResult.parsedData}
-                  user={user}
-                />
-              )}
+              </Link>
             </div>
           )}
+
+          {analyzeError && (
+            <div className="text-red-600 mt-2">{analyzeError}</div>
+          )}
+          {analyzeResult && (
+            <ResumeAnalysisResult
+              atsScore={analyzeResult.atsScore}
+              categoryInsights={analyzeResult.categoryInsights}
+              resumeImprovements={analyzeResult.resumeImprovements}
+              extractedText={analyzeResult.extractedText}
+              parsedData={analyzeResult.parsedData}
+              user={user}
+            />
+          )}
+
           <div className="flex flex-col items-center gap-2 mt-6">
             <span className="text-xs text-muted-foreground">or</span>
             <GoogleSignInButton />
@@ -344,6 +353,6 @@ export default function Home() {
         </CardContent>
       </Card>
       <ResponsiveToaster />
-    </main>
+    </div>
   );
 }

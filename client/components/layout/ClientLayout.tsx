@@ -48,12 +48,14 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
             </div>
           )}
 
-          {/* Main Nav Content - 60% width */}
-          <div className="w-[60%] mx-auto">
+          {/* Main Nav Content - Responsive width */}
+          <div className="w-[95%] md:w-[75%] lg:w-[60%] mx-auto">
             <div className="flex items-center justify-between h-16 px-4">
               {/* Left side - Logo */}
               <div className="flex items-center">
-                <h2 className="text-xl font-bold text-blue-500">AlignCV</h2>
+                <Link href="/" className="text-xl font-bold text-blue-500">
+                  AlignCV
+                </Link>
               </div>
 
               {/* Center - Navigation Links */}
@@ -104,7 +106,9 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
 
       {/* Main Content */}
       <main className="min-h-screen pt-16">
-        <div className="w-[60%] mx-auto px-4 py-8">{children}</div>
+        <div className="w-[95%] md:w-[75%] lg:w-[60%] mx-auto px-4 py-8">
+          {children}
+        </div>
       </main>
     </div>
   );

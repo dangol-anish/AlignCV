@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { IResume } from "../types/resume";
-import { navItems } from "./constants/NavItems";
+import { navItems } from "../constants/NavItems";
 import Link from "next/link";
 import {
   LogInIcon,
@@ -200,6 +200,7 @@ export default function Home() {
         <Divider />
 
         <LandingMetricsHighlights />
+        <Divider />
       </div>
       <ResponsiveToaster />
     </main>

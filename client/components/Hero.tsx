@@ -10,9 +10,10 @@ export default function Hero() {
         <h1 className="text-white text-5xl md:text-6xl lg:text-7xl font-light">
           Align
         </h1>
-        <p className="text-6xl md:text-7xl lg:text-8xl text-blue-500 lg:font-semibold">
+        <p className="text-6xl md:text-7xl lg:text-8xl text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-blue-400 to-blue-300 lg:font-semibold">
           Your CV
         </p>
+
         <p className="text-3xl md:text-4xl lg:text-5xl text-stone-400 lg:font-thin mt-2">
           With Your Goals
         </p>

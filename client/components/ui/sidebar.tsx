@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { navItems } from "@/app/constants/NavItems";
+import { navItems } from "@/constants/NavItems";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";

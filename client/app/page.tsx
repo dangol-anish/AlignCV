@@ -44,6 +44,7 @@ import { useResumeAnalysis } from "@/components/ResumeAnalysis";
 import LandingFeatures from "@/components/LandingFeatures";
 import Divider from "@/components/Divider";
 import LandingMetricsHighlights from "@/components/LandingMetricsHighlights";
+import CTAHeroSection from "@/components/CTAHeroSection";
 
 interface AnalysisResult {
   extractedText: string;
@@ -176,7 +177,7 @@ export default function Home() {
       <div className="container mx-auto flex flex-col gap-20">
         <Hero />
 
-        <div className="relative ">
+        <div id="upload-section" className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-3xl" />
           <div className="relative">
             <ResumeUploader
@@ -201,6 +202,7 @@ export default function Home() {
 
         <LandingMetricsHighlights />
         <Divider />
+        <CTAHeroSection />
       </div>
       <ResponsiveToaster />
     </main>

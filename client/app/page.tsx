@@ -45,6 +45,7 @@ import LandingFeatures from "@/components/LandingFeatures";
 import Divider from "@/components/Divider";
 import LandingMetricsHighlights from "@/components/LandingMetricsHighlights";
 import CTAHeroSection from "@/components/CTAHeroSection";
+import Footer from "@/components/Footer";
 
 interface AnalysisResult {
   extractedText: string;
@@ -203,7 +204,9 @@ export default function Home() {
         <LandingMetricsHighlights />
         <Divider />
         <CTAHeroSection />
+        <Divider />
       </div>
+      <Footer />
       <ResponsiveToaster />
     </main>
   );

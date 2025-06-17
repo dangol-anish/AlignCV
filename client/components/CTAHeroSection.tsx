@@ -16,7 +16,7 @@ const CTAHeroSection = () => {
 
   return (
     <>
-      <div className="flex flex-col justify-center items-center mb-12">
+      <div className="flex flex-col justify-center items-center ">
         <h2 className="text-5xl text-stone-100 mb-4 font-light">
           Ready to Align?
         </h2>

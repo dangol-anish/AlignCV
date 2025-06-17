@@ -3,13 +3,13 @@ import { LandingFeaturesItem } from "@/constants/LandingFeatureItems";
 
 const LandingFeatures = () => {
   return (
-    <section className="py-16">
+    <section className=" ">
       <div className="flex flex-col justify-center items-center mb-12">
-        <h2 className="text-4xl font-bold text-stone-100 mb-4">
+        <h2 className="text-5xl  text-stone-100 mb-4 font-light">
           Everything you need
         </h2>
-        <p className="text-stone-400 text-lg">
-          Powerful features to boost your job search
+        <p className="text-stone-400 text-lg font-thin">
+          Comprehensive tools to optimize your job search process
         </p>
       </div>
 

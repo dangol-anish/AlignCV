@@ -42,6 +42,8 @@ import Hero from "@/components/Hero";
 import ResponsiveToaster from "@/components/ResponsiveToaster";
 import { useResumeAnalysis } from "@/components/ResumeAnalysis";
 import LandingFeatures from "@/components/LandingFeatures";
+import Divider from "@/components/Divider";
+import LandingMetricsHighlights from "@/components/LandingMetricsHighlights";
 
 interface AnalysisResult {
   extractedText: string;
@@ -193,8 +195,11 @@ export default function Home() {
             />
           </div>
         </div>
-
+        <Divider />
         <LandingFeatures />
+        <Divider />
+
+        <LandingMetricsHighlights />
       </div>
       <ResponsiveToaster />
     </main>

@@ -41,6 +41,7 @@ import ResumeUploader from "@/components/ResumeUploader";
 import Hero from "@/components/Hero";
 import ResponsiveToaster from "@/components/ResponsiveToaster";
 import { useResumeAnalysis } from "@/components/ResumeAnalysis";
+import LandingFeatures from "@/components/LandingFeatures";
 
 interface AnalysisResult {
   extractedText: string;
@@ -170,10 +171,10 @@ export default function Home() {
 
   return (
     <main className="min-h-screen text-white">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto flex flex-col gap-20">
         <Hero />
 
-        <div className="relative mt-8">
+        <div className="relative ">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-3xl" />
           <div className="relative">
             <ResumeUploader
@@ -192,6 +193,8 @@ export default function Home() {
             />
           </div>
         </div>
+
+        <LandingFeatures />
       </div>
       <ResponsiveToaster />
     </main>

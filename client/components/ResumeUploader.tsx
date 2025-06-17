@@ -81,7 +81,7 @@ export default function ResumeUploader({
   };
 
   return (
-    <Card className="bg-stone-950 border-2 border-dashed border-zinc-700 transition-colors duration-200 group hover:border-blue-500 hover:bg-blue-950/20">
+    <Card className="bg-stone-950 border-2 border-dashed border-stone-700 transition-colors duration-200 group hover:border-blue-500 hover:bg-blue-950/20">
       <CardContent className="">
         {!analyzeResult ? (
           <label className="cursor-pointer w-full h-full flex flex-col gap-6 pt-6">
@@ -98,12 +98,12 @@ export default function ResumeUploader({
               ) : (
                 <>
                   <Upload className="w-16 h-16 text-blue-500 group-hover:text-blue-400 transition-colors duration-200 mb-3" />
-                  <h3 className="text-2xl font-bold text-zinc-100">
+                  <h3 className="text-xl text-stone-100">
                     Drop your resume here
                   </h3>
-                  <p className="text-zinc-400">or click to browse</p>
-                  <p className="text-sm text-zinc-500">
-                    Supports PDF, DOC, DOCX
+                  <p className="text-stone-400 ">or click to browse</p>
+                  <p className="text-sm text-stone-400">
+                    Supports PDF, DOC, DOCX, PNG, JPEG
                   </p>
                 </>
               )}
@@ -124,34 +124,34 @@ export default function ResumeUploader({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="center"
-                    className="w-[280px] bg-zinc-800 border-zinc-700"
+                    className="w-[280px] bg-stone-800 border-stone-700"
                   >
                     {userResumes.length === 0 ? (
                       <div className="p-4 text-center">
-                        <p className="text-zinc-400 text-sm">
+                        <p className="text-stone-400 text-sm">
                           No stored resumes found
                         </p>
                       </div>
                     ) : (
                       <>
-                        <DropdownMenuLabel className="text-zinc-400 text-xs font-normal px-2">
+                        <DropdownMenuLabel className="text-stone-400 text-xs font-normal px-2">
                           Your stored resumes
                         </DropdownMenuLabel>
-                        <DropdownMenuSeparator className="bg-zinc-700" />
+                        <DropdownMenuSeparator className="bg-stone-700" />
                         {userResumes.map((resume) => (
                           <DropdownMenuItem
                             key={resume.id}
-                            className="text-zinc-100 hover:bg-zinc-700 cursor-pointer focus:bg-zinc-700 transition-colors duration-150"
+                            className="text-stone-100 hover:bg-stone-700 cursor-pointer focus:bg-stone-700 transition-colors duration-150"
                             onClick={() => handleStoredResumeSelect(resume.id)}
                           >
                             <div className="flex flex-col w-full">
                               <div className="flex items-center gap-2">
-                                <FileText className="h-4 w-4 text-zinc-400" />
+                                <FileText className="h-4 w-4 text-stone-400" />
                                 <span className="font-medium truncate">
                                   {resume.original_filename}
                                 </span>
                               </div>
-                              <span className="text-xs text-zinc-400 mt-0.5">
+                              <span className="text-xs text-stone-400 mt-0.5">
                                 {new Date(
                                   resume.uploaded_at
                                 ).toLocaleDateString()}
@@ -169,14 +169,14 @@ export default function ResumeUploader({
         ) : (
           <div>
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-bold text-zinc-100">
+              <h3 className="text-2xl font-bold text-stone-100">
                 Analysis Results
               </h3>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={resetAnalysis}
-                className="text-zinc-400 hover:text-zinc-100"
+                className="text-stone-400 hover:text-stone-100"
               >
                 <X className="h-5 w-5" />
               </Button>
@@ -184,11 +184,11 @@ export default function ResumeUploader({
 
             {analyzeResult.atsScore && (
               <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2 text-zinc-100">
+                <h3 className="text-lg font-semibold mb-2 text-stone-100">
                   ATS Score
                 </h3>
-                <div className="bg-zinc-900 p-4 rounded-lg">
-                  <pre className="whitespace-pre-wrap text-zinc-300">
+                <div className="bg-stone-900 p-4 rounded-lg">
+                  <pre className="whitespace-pre-wrap text-stone-300">
                     {JSON.stringify(analyzeResult.atsScore, null, 2)}
                   </pre>
                 </div>
@@ -197,11 +197,11 @@ export default function ResumeUploader({
 
             {analyzeResult.categoryInsights && (
               <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2 text-zinc-100">
+                <h3 className="text-lg font-semibold mb-2 text-stone-100">
                   Category Insights
                 </h3>
-                <div className="bg-zinc-900 p-4 rounded-lg">
-                  <pre className="whitespace-pre-wrap text-zinc-300">
+                <div className="bg-stone-900 p-4 rounded-lg">
+                  <pre className="whitespace-pre-wrap text-stone-300">
                     {JSON.stringify(analyzeResult.categoryInsights, null, 2)}
                   </pre>
                 </div>
@@ -211,14 +211,17 @@ export default function ResumeUploader({
             {analyzeResult.resumeImprovements &&
               analyzeResult.resumeImprovements.length > 0 && (
                 <div>
-                  <h3 className="text-lg font-semibold mb-2 text-zinc-100">
+                  <h3 className="text-lg font-semibold mb-2 text-stone-100">
                     Suggested Improvements
                   </h3>
                   <div className="space-y-4">
                     {analyzeResult.resumeImprovements.map(
                       (improvement, index) => (
-                        <div key={index} className="bg-zinc-900 p-4 rounded-lg">
-                          <p className="font-medium text-zinc-300">
+                        <div
+                          key={index}
+                          className="bg-stone-900 p-4 rounded-lg"
+                        >
+                          <p className="font-medium text-stone-300">
                             Original: {improvement.original}
                           </p>
                           <p className="text-red-400">

@@ -4,7 +4,7 @@ import { OnlineBadge } from "@/components/ui/online-badge";
 
 export default function Hero() {
   return (
-    <div className="text-center mb-16 flex flex-col gap-10">
+    <div className="text-center flex flex-col gap-10">
       <OnlineBadge />
       <div className="flex flex-col gap-2">
         <h1 className="text-white text-5xl md:text-6xl lg:text-7xl font-light">

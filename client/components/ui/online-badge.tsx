@@ -29,7 +29,9 @@ export function OnlineBadge() {
               : "bg-green-500/30 shadow-none"
           )}
         />
-        <span className="text-sm text-zinc-400">AI Powered</span>
+        <span className="text-sm text-zinc-400 font-thin tracking-wider">
+          AI Powered
+        </span>
       </Badge>
     </div>
   );

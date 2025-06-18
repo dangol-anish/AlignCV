@@ -10,6 +10,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { LogIn } from "lucide-react";
+import { navItems } from "@/constants/NavItems";
 
 interface ClientLayoutProps {
   children: React.ReactNode;
@@ -19,12 +20,6 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   const user = useUserStore((state) => state.user);
   const { isOpen, toggle } = useSidebarStore();
   const pathname = usePathname();
-
-  const navItems = [
-    { label: "Resume Analysis", path: "/resume-analysis" },
-    { label: "Job Match", path: "/job-match" },
-    { label: "Cover Letter", path: "/cover-letter" },
-  ];
 
   return (
     <div className="min-h-screen bg-stone-950">

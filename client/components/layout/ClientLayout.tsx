@@ -9,6 +9,7 @@ import { useSidebarStore } from "@/lib/useSidebarStore";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { LogIn } from "lucide-react";
 
 interface ClientLayoutProps {
   children: React.ReactNode;
@@ -32,7 +33,7 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
         <div className="relative">
           {/* Sidebar Toggle Button - Leftmost */}
           {user && (
-            <div className="absolute left-4 top-1/2 -translate-y-1/2">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
               <Button
                 variant="outline"
                 size="icon"
@@ -59,8 +60,8 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
                 </Link>
               </div>
 
-              {/* Center - Navigation Links */}
-              <div className="hidden md:flex items-center space-x-4">
+              {/* Center - Navigation Links (hidden on mobile) */}
+              <div className="hidden md:flex items-center space-x-4 flex-1 justify-center">
                 {navItems.map((item) => (
                   <Link
                     key={item.path}
@@ -76,12 +77,12 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
               </div>
 
               {/* Right side - Auth Button */}
-              <div>
+              <div className="flex justify-end">
                 {user ? (
                   <Link href="/dashboard">
                     <Button
-                      variant="outline"
-                      className="text-blue-500 hover:text-blue-400 border-zinc-800"
+                      size="sm"
+                      className="cursor-pointer text-sm font-light tracking-wide bg-gradient-to-r from-blue-500 to-blue-600 text-stone-100 border border-blue-400/50 hover:from-blue-600 hover:to-blue-700 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 px-4 py-1.5"
                     >
                       Dashboard
                     </Button>
@@ -89,10 +90,11 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
                 ) : (
                   <Link href="/auth">
                     <Button
-                      variant="outline"
-                      className="text-blue-500 hover:text-blue-400 border-zinc-800"
+                      variant="ghost"
+                      size="sm"
+                      className="text-sm font-light tracking-wide text-blue-500 cursor-pointer flex gap-2 hover:text-stone-100 hover:bg-stone-950 px-4 py-1.5"
                     >
-                      Sign In
+                      <p>Sign In</p> <LogIn size={16} />
                     </Button>
                   </Link>
                 )}

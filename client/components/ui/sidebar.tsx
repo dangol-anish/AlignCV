@@ -84,15 +84,35 @@ export const Sidebar: React.FC = () => {
           {/* User Section */}
           <div className="p-4 border-t border-stone-800">
             {user ? (
-              <div className="space-y-2">
-                <div className="text-sm text-stone-400">
-                  Signed in as {user.email}
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  {user.user_metadata?.avatar_url ? (
+                    <img
+                      src={user.user_metadata.avatar_url}
+                      alt={user.user_metadata?.full_name || user.email}
+                      className="h-8 w-8 rounded-full border border-stone-800"
+                    />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-stone-800 flex items-center justify-center text-stone-400 text-sm">
+                      {(user.user_metadata?.full_name ||
+                        user.email ||
+                        "U")[0].toUpperCase()}
+                    </div>
+                  )}
+                  <div className="flex flex-col">
+                    <span className="text-sm text-stone-100 font-light">
+                      {user.user_metadata?.full_name || "User"}
+                    </span>
+                    <span className="text-xs text-stone-400 font-thin">
+                      {user.email}
+                    </span>
+                  </div>
                 </div>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
                   onClick={handleLogout}
-                  className="w-full text-stone-400 hover:text-blue-500"
+                  className="w-full  text-blue-500 hover:text-red-500 bg-stone-900/50 hover:bg-red-950/20 cursor-pointer transition-colors duration-200"
                 >
                   Logout
                 </Button>

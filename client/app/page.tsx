@@ -27,7 +27,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { OnlineBadge } from "@/components/ui/online-badge";
-import { FloatingDots } from "@/components/ui/floating-dots";
+import FloatingDots from "@/components/ui/floating-dots";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -174,8 +174,11 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen text-white">
-      <div className="container mx-auto flex flex-col gap-20">
+    <main className="min-h-screen text-white relative">
+      <div className="absolute inset-0">
+        <FloatingDots />
+      </div>
+      <div className="container mx-auto flex flex-col gap-20 relative">
         <Hero />
 
         <div id="upload-section" className="relative">

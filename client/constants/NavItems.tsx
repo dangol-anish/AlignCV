@@ -1,4 +1,4 @@
-import { FileText, Briefcase, Mail } from "lucide-react";
+import { FileText, Briefcase, FileCheck } from "lucide-react";
 
 export const navItems = [
   {
@@ -14,6 +14,6 @@ export const navItems = [
   {
     label: "Cover Letters",
     path: "/cover-letter",
-    icon: Mail,
+    icon: FileCheck,
   },
 ];

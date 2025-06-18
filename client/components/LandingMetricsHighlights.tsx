@@ -6,7 +6,7 @@ const LandingMetricsHighlights = () => {
     <section>
       <div className="flex flex-col justify-center items-center mb-12">
         <h2 className="text-4xl text-stone-100 mb-4 font-light">
-          Why AlignCV Works
+          Why Align<span className="text-blue-500">CV</span> Works
         </h2>
         <p className="text-stone-400 text-lg font-thin">Built For Results</p>
       </div>

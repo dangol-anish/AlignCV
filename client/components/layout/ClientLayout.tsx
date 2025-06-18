@@ -53,8 +53,9 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
             <div className="flex items-center justify-between h-16 px-4">
               {/* Left side - Logo */}
               <div className="flex items-center">
-                <Link href="/" className="text-xl font-bold text-blue-500">
-                  AlignCV
+                <Link href="/" className="text-xl font-bold text-blue-500 flex">
+                  <p className="text-stone-100">Align</p>
+                  <p>CV</p>
                 </Link>
               </div>
 

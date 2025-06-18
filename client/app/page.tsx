@@ -67,6 +67,7 @@ export default function Home() {
   const [analyzeResult, setAnalyzeResult] = useState<AnalysisResult | null>(
     null
   );
+  const router = useRouter();
 
   useEffect(() => {
     if (user) {
@@ -79,15 +80,129 @@ export default function Home() {
   }, [user]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      if (selectedFile.size > 2 * 1024 * 1024) {
-        toast.error("File size exceeds 2MB limit");
-        return;
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+
+    if (selectedFile.size > 2 * 1024 * 1024) {
+      toast.error("File size exceeds 2MB limit");
+      return;
+    }
+
+    // Clear any previous selection
+    setSelectedResumeId("");
+    setFile(selectedFile);
+
+    // Start analysis immediately
+    await analyzeResume(selectedFile);
+  };
+
+  const analyzeResume = async (resumeFile: File) => {
+    setAnalyzeLoading(true);
+    setAnalyzeError(null);
+    setAnalyzeResult(null);
+
+    try {
+      // First analyze the file
+      const formData = new FormData();
+      formData.append("file", resumeFile);
+
+      const response = await fetch("http://localhost:3000/api/analyze", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to analyze resume");
       }
-      setFile(selectedFile);
-      setSelectedResumeId(""); // clear dropdown selection if file is chosen
-      await handleAnalyzeOrUpload();
+
+      const data = await response.json();
+
+      // If user is logged in, also save the file
+      if (user?.token) {
+        const uploadFormData = new FormData();
+        uploadFormData.append("file", resumeFile);
+        await fetch("http://localhost:3000/api/upload", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+          body: uploadFormData,
+        });
+      }
+
+      // Store results
+      const results = {
+        extractedText: data.extractedText || "",
+        parsedData: data.parsed,
+        atsScore: data.atsScore,
+        categoryInsights: data.categoryInsights,
+        resumeImprovements: data.lineImprovements || [],
+      };
+
+      setAnalyzeResult(results);
+      useResumeAnalysisStore.getState().setResults(results);
+
+      toast.success("Analysis completed successfully!");
+      router.push("/resume/analysis");
+    } catch (error: any) {
+      const errorMessage = error.message || "An error occurred during analysis";
+      setAnalyzeError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setAnalyzeLoading(false);
+    }
+  };
+
+  const analyzeStoredResume = async (resumeId: string) => {
+    if (!user?.token) {
+      toast.error("Please sign in to analyze stored resumes");
+      return;
+    }
+
+    setAnalyzeLoading(true);
+    setAnalyzeError(null);
+    setAnalyzeResult(null);
+    setFile(null);
+
+    try {
+      const response = await fetch("http://localhost:3000/api/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({ resume_id: resumeId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to analyze resume");
+      }
+
+      const data = await response.json();
+
+      // Store results
+      const results = {
+        extractedText: data.extractedText || "",
+        parsedData: data.parsed,
+        atsScore: data.atsScore,
+        categoryInsights: data.categoryInsights,
+        resumeImprovements: data.lineImprovements || [],
+      };
+
+      setAnalyzeResult(results);
+      useResumeAnalysisStore.getState().setResults(results);
+
+      toast.success("Analysis completed successfully!");
+      router.push("/resume/analysis");
+    } catch (error: any) {
+      console.error("Error analyzing stored resume:", error);
+      const errorMessage = error.message || "An error occurred during analysis";
+      setAnalyzeError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setAnalyzeLoading(false);
     }
   };
 
@@ -97,79 +212,12 @@ export default function Home() {
   ) => {
     if (e) e.preventDefault();
 
-    // Use the provided resumeId or the state value
-    const currentResumeId = resumeId || selectedResumeId;
-
-    // Check if either a file is selected or a stored resume is chosen
-    if (!file && !currentResumeId) {
+    if (resumeId) {
+      await analyzeStoredResume(resumeId);
+    } else if (file) {
+      await analyzeResume(file);
+    } else {
       toast.error("Please select a file or stored resume");
-      return;
-    }
-
-    setAnalyzeLoading(true);
-    setAnalyzeError(null);
-    setAnalyzeResult(null);
-
-    try {
-      let response;
-
-      if (currentResumeId) {
-        // Handle stored resume analysis
-        if (!user?.token) {
-          throw new Error("User not authenticated");
-        }
-
-        response = await fetch("http://localhost:3000/api/analyze", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-          body: JSON.stringify({ resume_id: currentResumeId }),
-        });
-      } else if (file) {
-        // Handle file upload and analysis
-        const formData = new FormData();
-        formData.append("file", file);
-        response = await fetch("http://localhost:3000/api/analyze", {
-          method: "POST",
-          body: formData,
-        });
-
-        // If file was uploaded and user is logged in, also save it
-        if (user?.token) {
-          const uploadFormData = new FormData();
-          uploadFormData.append("file", file);
-          await fetch("http://localhost:3000/api/upload", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${user.token}`,
-            },
-            body: uploadFormData,
-          });
-        }
-      }
-
-      if (!response?.ok) {
-        const errorData = await response?.json();
-        throw new Error(errorData?.message || "Analysis failed");
-      }
-
-      const data = await response.json();
-      setAnalyzeResult({
-        extractedText: data.extractedText || "",
-        parsedData: data.parsed,
-        atsScore: data.atsScore,
-        categoryInsights: data.categoryInsights,
-        resumeImprovements: data.lineImprovements || [],
-      });
-
-      toast.success("Analysis completed successfully!");
-    } catch (error: any) {
-      setAnalyzeError(error.message || "An error occurred during analysis");
-      toast.error(error.message || "An error occurred during analysis");
-    } finally {
-      setAnalyzeLoading(false);
     }
   };
 

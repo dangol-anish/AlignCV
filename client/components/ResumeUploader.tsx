@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useState } from "react";
 
 interface AnalysisResult {
   extractedText: string;
@@ -57,10 +58,43 @@ export default function ResumeUploader({
   userResumes,
 }: ResumeUploaderProps) {
   const user = useUserStore((state) => state.user);
+  const [isDragging, setIsDragging] = useState(false);
 
   const resetAnalysis = () => {
     setFile(null);
     setSelectedResumeId("");
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const droppedFile = e.dataTransfer.files[0];
+    if (droppedFile) {
+      if (droppedFile.size > 2 * 1024 * 1024) {
+        toast.error("File size exceeds 2MB limit");
+        return;
+      }
+      // Set the file first
+      setFile(droppedFile);
+      setSelectedResumeId(""); // clear dropdown selection if file is chosen
+
+      // Wait for state to update
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Now start the analysis
+      await handleAnalyzeOrUpload();
+    }
   };
 
   const handleStoredResumeSelect = async (resumeId: string) => {
@@ -72,7 +106,7 @@ export default function ResumeUploader({
         toast.error("Please sign in to analyze stored resumes");
         return;
       }
-      // Call the analysis function with the resumeId directly
+      // Call the analysis function with the resumeId
       await handleAnalyzeOrUpload(undefined, resumeId);
     } catch (error) {
       console.error("Error selecting stored resume:", error);
@@ -81,10 +115,21 @@ export default function ResumeUploader({
   };
 
   return (
-    <Card className="bg-stone-950 border-2 border-dashed border-stone-700 transition-colors duration-200 group hover:border-blue-500 hover:bg-blue-950/20">
+    <Card
+      className={`bg-stone-950 border-2 border-dashed transition-colors duration-200 group ${
+        isDragging
+          ? "border-blue-500 bg-blue-950/20"
+          : "border-stone-700 hover:border-blue-500 hover:bg-blue-950/20"
+      }`}
+    >
       <CardContent className="">
         {!analyzeResult ? (
-          <label className="cursor-pointer w-full h-full flex flex-col gap-6 pt-6">
+          <label
+            className="cursor-pointer w-full h-full flex flex-col gap-6 pt-6"
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
             <Input
               type="file"
               accept=".pdf,.doc,.docx"
@@ -94,12 +139,21 @@ export default function ResumeUploader({
             />
             <div className="flex flex-col gap-3 items-center justify-center text-center">
               {isLoading || analyzeLoading ? (
-                <Loader2 className="w-16 h-16 animate-spin text-blue-500 mb-3" />
+                <div className="flex flex-col items-center gap-3">
+                  <Loader2 className="w-16 h-16 animate-spin text-blue-500 mb-3" />
+                  <p className="text-stone-400">Analyzing your resume...</p>
+                </div>
               ) : (
                 <>
-                  <Upload className="w-16 h-16 text-blue-500 group-hover:text-blue-400 transition-colors duration-200 mb-3" />
+                  <Upload
+                    className={`w-16 h-16 text-blue-500 group-hover:text-blue-400 transition-colors duration-200 mb-3 ${
+                      isDragging ? "animate-bounce" : ""
+                    }`}
+                  />
                   <h3 className="text-xl text-stone-100">
-                    Drop your resume here
+                    {isDragging
+                      ? "Drop your resume here"
+                      : "Drop your resume here"}
                   </h3>
                   <p className="text-stone-400 ">or click to browse</p>
                   <p className="text-sm text-stone-400">

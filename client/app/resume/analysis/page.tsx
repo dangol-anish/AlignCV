@@ -99,7 +99,9 @@ export default function ResumeAnalysisPage() {
                 {atsScore.score}%
               </p>
               <div className="mt-2 prose prose-sm text-yellow-900 max-w-none">
-                <ReactMarkdown>{atsScore.explanation}</ReactMarkdown>
+                <ReactMarkdown>
+                  {atsScore.feedback?.join("\n") || ""}
+                </ReactMarkdown>
               </div>
             </div>
           )}

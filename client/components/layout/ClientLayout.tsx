@@ -29,16 +29,16 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-stone-950">
       {/* Navigation Bar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-stone-950 border-b-[0.2px] border-zinc-800">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-stone-950 border-b-[0.2px] border-stone-800">
         <div className="relative">
           {/* Sidebar Toggle Button - Leftmost */}
           {user && (
             <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
               <Button
-                variant="outline"
+                variant="ghost"
                 size="icon"
                 onClick={toggle}
-                className="text-blue-500 hover:text-blue-400 border-zinc-800"
+                className="text-blue-500 cursor-pointer hover:text-blue-400 border-stone-800 hover:bg-stone-950"
               >
                 {isOpen ? (
                   <PanelRightOpen className="h-5 w-5" />
@@ -53,9 +53,9 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
           <div className="w-[95%] md:w-[75%] lg:w-[60%] mx-auto">
             <div className="flex items-center justify-between h-16 px-4">
               {/* Left side - Logo */}
-              <div className="flex items-center">
+              <div className="flex-1 md:flex-none flex justify-center md:justify-start">
                 <Link href="/" className="text-xl font-bold text-blue-500 flex">
-                  <p className="text-stone-100">Align</p>
+                  <p className="text-stone-100 font-light">Align</p>
                   <p>CV</p>
                 </Link>
               </div>
@@ -67,7 +67,7 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
                     key={item.path}
                     href={item.path}
                     className={cn(
-                      "text-sm text-zinc-400 hover:text-blue-500 transition-colors",
+                      "text-sm text-stone-400 hover:text-blue-500 transition-colors",
                       pathname === item.path && "text-blue-500"
                     )}
                   >
@@ -77,7 +77,7 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
               </div>
 
               {/* Right side - Auth Button */}
-              <div className="flex justify-end">
+              <div className="flex-1 md:flex-none flex justify-end">
                 {user ? (
                   <Link href="/dashboard">
                     <Button

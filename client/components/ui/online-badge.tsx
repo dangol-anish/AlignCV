@@ -19,7 +19,7 @@ export function OnlineBadge() {
     <div className="flex justify-center">
       <Badge
         variant="outline"
-        className="flex items-center gap-2 border-zinc-800 w-fit"
+        className="flex items-center gap-2 border-stone-800 w-fit"
       >
         <div
           className={cn(
@@ -29,7 +29,7 @@ export function OnlineBadge() {
               : "bg-green-500/30 shadow-none"
           )}
         />
-        <span className="text-sm text-zinc-400 font-thin tracking-wider">
+        <span className="text-sm text-stone-400 font-thin tracking-wider">
           AI Powered
         </span>
       </Badge>

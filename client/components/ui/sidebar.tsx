@@ -42,53 +42,57 @@ export const Sidebar: React.FC = () => {
       {/* Sidebar */}
       <div
         className={cn(
-          "fixed top-0 left-0 z-50 h-screen w-64 bg-zinc-950 border-r border-zinc-800 transition-transform duration-300 ease-in-out",
+          "fixed top-0 left-0 z-50 h-screen w-64 bg-stone-950 border-r border-stone-800 transition-transform duration-300 ease-in-out",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-zinc-800">
-            <h2 className="text-xl font-bold text-blue-500">AlignCV</h2>
+          <div className="flex items-center justify-between py-3 px-4">
+            <h2 className="text-xl text-stone-100 font-light">
+              Align<span className="text-blue-500  font-bold">CV</span>
+            </h2>
             <Button
               variant="ghost"
               size="icon"
               onClick={close}
-              className="text-blue-500 hover:text-blue-400"
+              className="text-blue-500 hover:text-blue-400 hover:bg-stone-950 cursor-pointer"
             >
-              <PanelRightOpen className="h-6 w-6" />
+              <PanelRightOpen className="h-5 w-5" />
             </Button>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-2">
+          <nav className="flex-1 p-4 space-y-1">
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 href={item.path}
                 className={cn(
-                  "flex items-center px-4 py-2 text-sm rounded-md transition-colors",
+                  "flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors",
                   pathname === item.path
                     ? "bg-blue-500/10 text-blue-500"
-                    : "text-zinc-400 hover:text-blue-500 hover:bg-zinc-900"
+                    : "text-stone-400 hover:text-blue-500 hover:bg-stone-900"
                 )}
               >
+                <item.icon className="h-4 w-4" />
                 {item.label}
               </Link>
             ))}
           </nav>
 
           {/* User Section */}
-          <div className="p-4 border-t border-zinc-800">
+          <div className="p-4 border-t border-stone-800">
             {user ? (
               <div className="space-y-2">
-                <div className="text-sm text-zinc-400">
+                <div className="text-sm text-stone-400">
                   Signed in as {user.email}
                 </div>
                 <Button
                   variant="outline"
+                  size="sm"
                   onClick={handleLogout}
-                  className="w-full text-zinc-400 hover:text-blue-500"
+                  className="w-full text-stone-400 hover:text-blue-500"
                 >
                   Logout
                 </Button>
@@ -96,7 +100,7 @@ export const Sidebar: React.FC = () => {
             ) : (
               <Link
                 href="/auth"
-                className="flex items-center justify-center gap-2 px-4 py-2 text-sm text-zinc-400 hover:text-blue-500 hover:bg-zinc-900 rounded-md transition-colors"
+                className="flex items-center justify-center gap-2 px-3 py-1.5 text-sm text-stone-400 hover:text-blue-500 hover:bg-stone-900 rounded-md transition-colors"
               >
                 Sign In
               </Link>

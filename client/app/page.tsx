@@ -258,7 +258,6 @@ export default function Home() {
         <Divider />
       </div>
       <Footer />
-      <ResponsiveToaster />
     </main>
   );
 }

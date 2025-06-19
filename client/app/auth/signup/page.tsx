@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { useUserStore } from "@/lib/useUserStore";
 import { useSidebarStore } from "@/lib/useSidebarStore";
 
@@ -16,7 +16,6 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { toast } = useToast();
   const user = useUserStore((state) => state.user);
 
   // Redirect signed-in users to /dashboard
@@ -44,33 +43,22 @@ export default function SignUpPage() {
     }
     console.log("[SIGNUP] Response data:", data);
     if (res.ok) {
-      toast({
-        title: "Sign up successful!",
-        description: "You can now sign in.",
-      });
+      toast.success("Sign up successful! You can now sign in.");
       // Close sidebar after sign up
       if (typeof window !== "undefined") {
         const sidebarStore = require("@/lib/useSidebarStore");
         sidebarStore.useSidebarStore.getState().close();
       }
-      router.replace("/auth/signin");
+      router.replace("/auth/signin?signup=1");
     } else {
       if (
         data &&
         data.message ===
           "This email is already registered. Please sign in with Google."
       ) {
-        toast({
-          title: "Email already registered",
-          description: data.message,
-          variant: "destructive",
-        });
+        toast.error(data.message || "Email already registered");
       } else {
-        toast({
-          title: "Sign up failed",
-          description: (data && data.message) || "Sign up failed",
-          variant: "destructive",
-        });
+        toast.error((data && data.message) || "Sign up failed");
       }
       setLoading(false);
     }

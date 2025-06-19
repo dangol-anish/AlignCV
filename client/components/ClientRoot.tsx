@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useUserStore } from "@/lib/useUserStore";
 import { ToastProvider } from "@/components/ui/use-toast";
+import ResponsiveToaster from "@/components/ResponsiveToaster";
 
 export default function ClientRoot({
   children,
@@ -33,5 +34,10 @@ export default function ClientRoot({
     });
   }, [setUser, clearUser, setAuthLoading]);
 
-  return <ToastProvider>{children}</ToastProvider>;
+  return (
+    <ToastProvider>
+      <ResponsiveToaster />
+      {children}
+    </ToastProvider>
+  );
 }

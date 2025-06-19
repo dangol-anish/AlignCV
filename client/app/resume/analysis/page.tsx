@@ -18,23 +18,6 @@ import { Badge } from "@/components/ui/badge";
 import Divider from "@/components/Divider";
 import DividerSm from "@/components/DividerSm";
 
-function ResponsiveToaster() {
-  const [position, setPosition] = React.useState<any>("top-right");
-  useEffect(() => {
-    const check = () => {
-      if (window.innerWidth < 640) {
-        setPosition("top");
-      } else {
-        setPosition("top-right");
-      }
-    };
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
-  return <Toaster richColors position={position} />;
-}
-
 export default function ResumeAnalysisPage() {
   const {
     extractedText,
@@ -244,7 +227,6 @@ export default function ResumeAnalysisPage() {
             </Button>
           </div>
         </Card>
-        <ResponsiveToaster />
       </main>
     </>
   );

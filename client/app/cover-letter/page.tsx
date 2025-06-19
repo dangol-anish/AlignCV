@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useUserStore } from "@/lib/useUserStore";
 
@@ -34,7 +34,6 @@ const questions = [
 
 export default function CoverLetterPage() {
   const router = useRouter();
-  const { toast } = useToast();
   const { user, authLoading } = useUserStore();
   const [resumes, setResumes] = useState<any[]>([]);
   const [selectedResumeId, setSelectedResumeId] = useState("");
@@ -48,6 +47,7 @@ export default function CoverLetterPage() {
     if (authLoading) return;
 
     if (!user) {
+      toast.error("Only authenticated users can use this feature.");
       router.push("/");
       return;
     }
@@ -74,11 +74,7 @@ export default function CoverLetterPage() {
       }
       setResumes(data.resumes);
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message);
     } finally {
       setResumesLoading(false);
     }
@@ -93,11 +89,7 @@ export default function CoverLetterPage() {
 
   const handleGenerate = async () => {
     if (!jobDescription) {
-      toast({
-        title: "Error",
-        description: "Please enter a job description",
-        variant: "destructive",
-      });
+      toast.error("Please enter a job description");
       return;
     }
 
@@ -125,19 +117,12 @@ export default function CoverLetterPage() {
       }
 
       setGeneratedCoverLetter(data.result.cover_letter);
-      toast({
-        title: "Success",
-        description: "Cover letter generated successfully",
-      });
+      toast.success("Cover letter generated successfully");
 
       // Redirect to the view page
       router.push(`/cover-letter/${data.result.id}`);
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message);
     } finally {
       setLoading(false);
     }

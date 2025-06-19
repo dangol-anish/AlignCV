@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { useUserStore } from "@/lib/useUserStore";
 import { supabase } from "@/lib/supabaseClient";
 import { useSidebarStore } from "@/lib/useSidebarStore";
@@ -18,7 +18,7 @@ export default function SignInPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/dashboard";
-  const { toast } = useToast();
+  const signup = searchParams.get("signup");
   const user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
   const toastShownRef = useRef(false);
@@ -35,11 +35,12 @@ export default function SignInPage() {
     }
     // Show toast if redirected from a protected page, only once
     if (redirect && redirect !== "/dashboard" && !toastShownRef.current) {
-      toast({
-        title: "Authentication Required",
-        description: "Only authenticated users can use this feature.",
-        variant: "destructive",
-      });
+      toast.error("Only authenticated users can use this feature.");
+      toastShownRef.current = true;
+    }
+    // Show toast if redirected from sign up
+    if (signup === "1" && !toastShownRef.current) {
+      toast.success("Sign up successful! You can now sign in.");
       toastShownRef.current = true;
     }
   }, [user, router]);
@@ -52,11 +53,7 @@ export default function SignInPage() {
       password,
     });
     if (error) {
-      toast({
-        title: "Sign in failed",
-        description: error.message || "Invalid credentials",
-        variant: "destructive",
-      });
+      toast.error(error.message || "Invalid credentials");
       setLoading(false);
       return;
     }
@@ -80,7 +77,7 @@ export default function SignInPage() {
         const sidebarStore = require("@/lib/useSidebarStore");
         sidebarStore.useSidebarStore.getState().close();
       }
-      router.replace("/dashboard");
+      router.replace("/dashboard?signin=1");
     } else {
       setLoading(false);
     }

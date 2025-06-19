@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fetchUserResumes } from "@/lib/api/resume";
+import { toast } from "sonner";
 
 export default function JobMatchingPage() {
   const user = useUserStore((state) => state.user);
@@ -21,6 +22,7 @@ export default function JobMatchingPage() {
 
   useEffect(() => {
     if (!authLoading && !user) {
+      toast.error("Only authenticated users can use this feature.");
       router.replace("/auth/signin?redirect=/job-matching");
       return;
     }

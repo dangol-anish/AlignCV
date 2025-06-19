@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useUserStore } from "@/lib/useUserStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Toaster } from "sonner";
+import { Toaster, toast } from "sonner";
 
 function ResponsiveToaster() {
   const [position, setPosition] = useState<any>("top-right");
@@ -51,7 +51,6 @@ export default function ResumeImprovementsPage() {
           </p>
         </CardContent>
       </Card>
-      <ResponsiveToaster />
     </main>
   );
 }

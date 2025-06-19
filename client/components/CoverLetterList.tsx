@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 interface CoverLetter {
@@ -15,7 +15,6 @@ export function CoverLetterList() {
   const [coverLetters, setCoverLetters] = useState<CoverLetter[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
 
   const fetchCoverLetters = async () => {
     try {
@@ -38,11 +37,7 @@ export function CoverLetterList() {
     } catch (error) {
       const err = error as Error;
       setError(err.message);
-      toast({
-        title: "Error",
-        description: err.message,
-        variant: "destructive",
-      });
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -55,10 +50,7 @@ export function CoverLetterList() {
 
   const handleCopy = (content: string) => {
     navigator.clipboard.writeText(content);
-    toast({
-      title: "Success",
-      description: "Cover letter copied to clipboard",
-    });
+    toast.success("Cover letter copied to clipboard");
   };
 
   if (loading) {

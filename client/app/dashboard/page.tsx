@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { useUserStore } from "@/lib/useUserStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 export default function Dashboard() {
   const [analyses, setAnalyses] = useState<any[]>([]);
@@ -19,14 +19,20 @@ export default function Dashboard() {
   const router = useRouter();
   const { user, clearUser } = useUserStore();
   const authLoading = useUserStore((state) => state.authLoading);
-  const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const toastShownRef = useRef(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
       router.replace("/");
       return;
     }
-  }, [authLoading, user, router]);
+    // Show toast on successful sign in
+    if (searchParams.get("signin") === "1" && !toastShownRef.current) {
+      toast.success("Signed in successfully!");
+      toastShownRef.current = true;
+    }
+  }, [authLoading, user, router, searchParams]);
 
   useEffect(() => {
     if (!user) return;
@@ -377,10 +383,7 @@ export default function Dashboard() {
                               navigator.clipboard.writeText(
                                 letter.cover_letter
                               );
-                              toast({
-                                title: "Copied!",
-                                description: "Cover letter copied to clipboard",
-                              });
+                              toast.success("Cover letter copied to clipboard");
                             }}
                           >
                             Copy

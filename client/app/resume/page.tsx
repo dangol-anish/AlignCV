@@ -62,7 +62,7 @@ export default function ResumeListPage() {
     return (
       <div className="max-w-2xl mx-auto py-8 text-center">
         <div className="text-red-600 mb-4">{error}</div>
-        <Button onClick={() => router.push("/auth")}>Sign In</Button>
+        <Button onClick={() => router.push("/auth/signin")}>Sign In</Button>
       </div>
     );
   }

@@ -233,7 +233,7 @@ export default function ResumeAnalysisPage() {
               className="cursor-pointer flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-stone-100 shadow-md transition-all duration-200"
               onClick={() => {
                 if (!user) {
-                  router.push("/auth?redirect=/resume/templates");
+                  router.push("/auth/signin?redirect=/resume/templates");
                 } else {
                   router.push("/resume/templates");
                 }

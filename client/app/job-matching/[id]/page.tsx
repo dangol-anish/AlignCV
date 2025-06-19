@@ -17,7 +17,7 @@ export default function JobMatchPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     if (!user) {
-      router.replace("/auth");
+      router.replace("/auth/signin");
       return;
     }
 

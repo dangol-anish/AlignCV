@@ -24,7 +24,7 @@ export default function ResumeTemplatesPage() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.replace("/auth?redirect=/resume/templates");
+      router.replace("/auth/signin?redirect=/resume/templates");
     }
   }, [authLoading, user, router]);
 

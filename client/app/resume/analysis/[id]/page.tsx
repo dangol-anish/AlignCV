@@ -21,7 +21,7 @@ export default function ResumeAnalysisPage({
 
   useEffect(() => {
     if (!user) {
-      router.replace("/auth");
+      router.replace("/auth/signin");
       return;
     }
 

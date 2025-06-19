@@ -20,12 +20,14 @@ export default function ClientRoot({
         setUser({
           id: session.user.id,
           email: session.user.email || "",
-          name: session.user.user_metadata?.name || "",
+          user_metadata: session.user.user_metadata,
           created_at: session.user.created_at,
           token: session.access_token,
         });
+        console.log("[CLIENTROOT] User set in store:", session.user);
       } else {
         clearUser();
+        console.log("[CLIENTROOT] User cleared from store");
       }
       setAuthLoading(false);
     });

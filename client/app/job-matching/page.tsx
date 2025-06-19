@@ -21,7 +21,7 @@ export default function JobMatchingPage() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.replace("/auth?redirect=/job-matching");
+      router.replace("/auth/signin?redirect=/job-matching");
       return;
     }
     if (!user) return;

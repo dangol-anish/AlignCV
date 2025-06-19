@@ -221,76 +221,7 @@ export default function ResumeUploader({
             )}
           </label>
         ) : (
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-bold text-stone-100">
-                Analysis Results
-              </h3>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={resetAnalysis}
-                className="text-stone-400 hover:text-stone-100"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-
-            {analyzeResult.atsScore && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2 text-stone-100">
-                  ATS Score
-                </h3>
-                <div className="bg-stone-900 p-4 rounded-lg">
-                  <pre className="whitespace-pre-wrap text-stone-300">
-                    {JSON.stringify(analyzeResult.atsScore, null, 2)}
-                  </pre>
-                </div>
-              </div>
-            )}
-
-            {analyzeResult.categoryInsights && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2 text-stone-100">
-                  Category Insights
-                </h3>
-                <div className="bg-stone-900 p-4 rounded-lg">
-                  <pre className="whitespace-pre-wrap text-stone-300">
-                    {JSON.stringify(analyzeResult.categoryInsights, null, 2)}
-                  </pre>
-                </div>
-              </div>
-            )}
-
-            {analyzeResult.resumeImprovements &&
-              analyzeResult.resumeImprovements.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-2 text-stone-100">
-                    Suggested Improvements
-                  </h3>
-                  <div className="space-y-4">
-                    {analyzeResult.resumeImprovements.map(
-                      (improvement, index) => (
-                        <div
-                          key={index}
-                          className="bg-stone-900 p-4 rounded-lg"
-                        >
-                          <p className="font-medium text-stone-300">
-                            Original: {improvement.original}
-                          </p>
-                          <p className="text-red-400">
-                            Issue: {improvement.issue}
-                          </p>
-                          <p className="text-green-400">
-                            Suggestion: {improvement.suggestion}
-                          </p>
-                        </div>
-                      )
-                    )}
-                  </div>
-                </div>
-              )}
-          </div>
+          <></>
         )}
       </CardContent>
     </Card>

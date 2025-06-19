@@ -10,31 +10,31 @@ export default function AuthCallback() {
   const setUser = useUserStore((state) => state.setUser);
 
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        const user = session.user;
-        const token = session.access_token;
-
-        if (user && token) {
-          setUser({
-            id: user.id,
-            email: user.email || "",
-            name: user.user_metadata?.name || "",
-            created_at: user.created_at || "",
-            token,
-          });
+    const code = searchParams.get("code");
+    async function handleOAuthCallback() {
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) {
+          router.replace("/auth/signin");
+          return;
         }
-
-        const redirect = searchParams.get("redirect") || "/dashboard";
-        router.replace(redirect);
       }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email || "",
+          user_metadata: session.user.user_metadata,
+          created_at: session.user.created_at,
+          token: session.access_token,
+        });
+      }
+      // Always redirect to http://localhost:3001/dashboard
+      window.location.href = "http://localhost:3001/dashboard";
+    }
+    handleOAuthCallback();
   }, [router, searchParams, setUser]);
 
   return (

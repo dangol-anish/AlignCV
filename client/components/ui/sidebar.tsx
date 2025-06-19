@@ -119,7 +119,7 @@ export const Sidebar: React.FC = () => {
               </div>
             ) : (
               <Link
-                href="/auth"
+                href="/auth/signin"
                 className="flex items-center justify-center gap-2 px-3 py-1.5 text-sm text-stone-400 hover:text-blue-500 hover:bg-stone-900 rounded-md transition-colors"
               >
                 Sign In

@@ -83,7 +83,7 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
                     </Button>
                   </Link>
                 ) : (
-                  <Link href="/auth">
+                  <Link href="/auth/signin">
                     <Button
                       variant="ghost"
                       size="sm"

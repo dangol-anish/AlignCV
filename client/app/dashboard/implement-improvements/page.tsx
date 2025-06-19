@@ -9,7 +9,7 @@ export default function ImplementImprovementsPage() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.replace("/auth?redirect=/dashboard/implement-improvements");
+      router.replace("/auth/signin?redirect=/dashboard/implement-improvements");
     }
   }, [authLoading, user, router]);
 

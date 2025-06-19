@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +21,7 @@ export default function SignInPage() {
   const { toast } = useToast();
   const user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
+  const toastShownRef = useRef(false);
 
   // Log the zustand user state on every render
   useEffect(() => {
@@ -31,6 +32,15 @@ export default function SignInPage() {
   useEffect(() => {
     if (user) {
       router.replace("/dashboard");
+    }
+    // Show toast if redirected from a protected page, only once
+    if (redirect && redirect !== "/dashboard" && !toastShownRef.current) {
+      toast({
+        title: "Authentication Required",
+        description: "Only authenticated users can use this feature.",
+        variant: "destructive",
+      });
+      toastShownRef.current = true;
     }
   }, [user, router]);
 

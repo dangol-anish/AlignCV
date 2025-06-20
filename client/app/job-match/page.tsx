@@ -125,7 +125,7 @@ export default function JobMatchingPage() {
               </h2>
 
               <div className="flex flex-col items-center justify-center mb-3">
-                <div className="relative mb-4 w-32 h-32">
+                <div className="relative mb-4">
                   <svg className="w-full h-full" viewBox="0 0 100 100">
                     <circle
                       className="text-stone-800"

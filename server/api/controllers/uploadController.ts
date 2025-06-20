@@ -13,6 +13,12 @@ export async function handleFileUpload(req: MulterRequest, res: Response) {
   const { originalname, mimetype, size } = req.file!;
   const cleanedText = req.cleanedText!;
 
+  // Add detailed logging
+  console.log("[UPLOAD] handleFileUpload called");
+  console.log("[UPLOAD] User ID:", req.user?.id);
+  console.log("[UPLOAD] File info:", { originalname, mimetype, size });
+  console.log("[UPLOAD] Cleaned text length:", cleanedText?.length);
+
   // Only validate and store the resume, no analysis or parsing
   try {
     const userId = req.user?.id ?? null;
@@ -29,14 +35,19 @@ export async function handleFileUpload(req: MulterRequest, res: Response) {
       ])
       .select()
       .single();
-    if (resumeError) throw resumeError;
+    if (resumeError) {
+      console.error("[UPLOAD] Supabase DB error:", resumeError);
+      throw resumeError;
+    }
+    console.log("[UPLOAD] Resume inserted:", resume);
     return res.json({ success: true, resume });
   } catch (dbError: any) {
-    console.error("Supabase DB error:", dbError);
+    console.error("[UPLOAD] Exception:", dbError);
     return res.status(500).json({
       success: false,
       message: "Failed to store resume in database.",
       code: "DB_ERROR",
+      error: dbError.message,
     });
   }
 }

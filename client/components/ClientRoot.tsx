@@ -16,8 +16,8 @@ export default function ClientRoot({
 
   useEffect(() => {
     setAuthLoading(true);
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user && session.access_token) {
         setUser({
           id: session.user.id,
           email: session.user.email || "",
@@ -26,12 +26,53 @@ export default function ClientRoot({
           token: session.access_token,
         });
         console.log("[CLIENTROOT] User set in store:", session.user);
+        setAuthLoading(false);
       } else {
-        clearUser();
-        console.log("[CLIENTROOT] User cleared from store");
+        // Try to refresh session if missing
+        const { data: refreshed, error } = await supabase.auth.refreshSession();
+        if (refreshed.session?.user && refreshed.session.access_token) {
+          setUser({
+            id: refreshed.session.user.id,
+            email: refreshed.session.user.email || "",
+            user_metadata: refreshed.session.user.user_metadata,
+            created_at: refreshed.session.user.created_at,
+            token: refreshed.session.access_token,
+          });
+          console.log(
+            "[CLIENTROOT] User set from refreshSession:",
+            refreshed.session.user
+          );
+        } else {
+          clearUser();
+          console.log("[CLIENTROOT] User cleared from store (no session)");
+        }
+        setAuthLoading(false);
       }
-      setAuthLoading(false);
     });
+    // Listen for session changes and update token in store
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (session?.user && session.access_token) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email || "",
+            user_metadata: session.user.user_metadata,
+            created_at: session.user.created_at,
+            token: session.access_token,
+          });
+          console.log(
+            "[CLIENTROOT] User updated from onAuthStateChange:",
+            session.user
+          );
+        } else {
+          clearUser();
+          console.log("[CLIENTROOT] User cleared from onAuthStateChange");
+        }
+      }
+    );
+    return () => {
+      listener?.subscription.unsubscribe();
+    };
   }, [setUser, clearUser, setAuthLoading]);
 
   return (

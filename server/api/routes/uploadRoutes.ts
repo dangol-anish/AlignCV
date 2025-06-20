@@ -24,6 +24,7 @@ const upload = multer({
 
 router.post(
   "/",
+  authMiddleware,
   upload.single("file"),
   validateFilePresence,
   validateMimeType,

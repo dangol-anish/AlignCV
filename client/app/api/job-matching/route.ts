@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const resumeId = searchParams.get("resume_id");
+
     const authHeader = request.headers.get("authorization");
     if (!authHeader) {
       return NextResponse.json(
@@ -19,7 +22,12 @@ export async function GET(request: Request) {
       );
     }
 
-    const response = await fetch(`${apiUrl}/api/job-matching`, {
+    const backendUrl = new URL(`${apiUrl}/api/job-matching`);
+    if (resumeId) {
+      backendUrl.searchParams.append("resume_id", resumeId);
+    }
+
+    const response = await fetch(backendUrl.toString(), {
       headers: {
         Authorization: authHeader,
       },

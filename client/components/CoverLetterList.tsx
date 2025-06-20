@@ -1,8 +1,6 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
 interface CoverLetter {
   id: string;
@@ -11,71 +9,24 @@ interface CoverLetter {
   created_at: string;
 }
 
-export function CoverLetterList() {
-  const [coverLetters, setCoverLetters] = useState<CoverLetter[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+interface CoverLetterListProps {
+  coverLetters: CoverLetter[];
+  onDelete: (id: string) => void;
+}
 
-  const fetchCoverLetters = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await fetch("/api/cover-letter", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to fetch cover letters");
-      }
-
-      setCoverLetters(data.coverLetters);
-    } catch (error) {
-      const err = error as Error;
-      setError(err.message);
-      toast.error(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCoverLetters();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+export function CoverLetterList({
+  coverLetters,
+  onDelete,
+}: CoverLetterListProps) {
   const handleCopy = (content: string) => {
     navigator.clipboard.writeText(content);
     toast.success("Cover letter copied to clipboard");
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center p-8">
-        <p className="text-red-500">{error}</p>
-        <Button onClick={fetchCoverLetters} className="mt-4">
-          Try Again
-        </Button>
-      </div>
-    );
-  }
-
   if (coverLetters.length === 0) {
     return (
       <div className="text-center p-8">
-        <p className="text-gray-500">No cover letters found</p>
+        <p className="text-gray-500">No cover letters found for this resume.</p>
       </div>
     );
   }
@@ -87,13 +38,22 @@ export function CoverLetterList() {
           <CardHeader>
             <CardTitle className="flex justify-between items-center">
               <span>Cover Letter</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleCopy(letter.content)}
-              >
-                Copy
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCopy(letter.content)}
+                >
+                  Copy
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => onDelete(letter.id)}
+                >
+                  Delete
+                </Button>
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent>

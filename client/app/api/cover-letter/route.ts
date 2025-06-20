@@ -2,7 +2,14 @@ import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const resumeId = searchParams.get("resume_id");
+
     const authHeader = request.headers.get("authorization");
+    console.log(
+      "[API/cover-letter] Received Authorization header:",
+      authHeader
+    );
     if (!authHeader) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
@@ -19,7 +26,15 @@ export async function GET(request: Request) {
       );
     }
 
-    const response = await fetch(`${apiUrl}/api/cover-letter`, {
+    console.log(
+      "[API/cover-letter] Forwarding Authorization header to backend:",
+      authHeader
+    );
+    const backendUrl = new URL(`${apiUrl}/api/cover-letter`);
+    if (resumeId) {
+      backendUrl.searchParams.append("resume_id", resumeId);
+    }
+    const response = await fetch(backendUrl.toString(), {
       headers: {
         Authorization: authHeader,
       },

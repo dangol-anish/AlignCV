@@ -90,7 +90,7 @@ export default function JobMatchingPage() {
         throw new Error(msg);
       }
       const data = await res.json();
-      setResult(data.result);
+      router.push(`/job-match/${data.result.id}`);
     } catch (e: any) {
       setError(e.message);
     } finally {

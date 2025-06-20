@@ -113,30 +113,27 @@ export default function CoverLetterContent() {
   console.log("Rendering cover letter:", coverLetter);
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">{coverLetter.job_title}</h1>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => window.print()}>
-            <Printer className="h-4 w-4 mr-2" />
-            Print
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => (window.location.href = `/cover-letter/${id}/edit`)}
-          >
-            <Pencil className="h-4 w-4 mr-2" />
-            Edit
-          </Button>
+    <div className="flex flex-col gap-4 ">
+      <div className="bg-stone-950 text-stone-100 rounded-xl shadow-lg p-8  border border-stone-700/50">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <h1 className="text-2xl font-bold text-blue-500 mb-2 md:mb-0 text-center md:text-left md:w-auto">
+            {coverLetter.job_title}
+          </h1>
+          <div className="flex gap-2 w-full md:w-auto justify-center md:justify-end"></div>
+        </div>
+        <div className="prose  prose-invert">
+          <div className="whitespace-pre-wrap font-mono text-stone-100 text-lg leading-relaxed">
+            {coverLetter.cover_letter}
+          </div>
         </div>
       </div>
-
-      <div className="prose max-w-none">
-        <div className="whitespace-pre-wrap font-mono">
-          {coverLetter.cover_letter}
-        </div>
-      </div>
+      <Button
+        className="w-full bg-gradient-to-r  from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-stone-100 font-light rounded-md shadow-md transition-all duration-200 mt-4"
+        onClick={() => window.print()}
+      >
+        <Printer className="h-5 w-5 mr-2" />
+        Print
+      </Button>
     </div>
   );
 }

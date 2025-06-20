@@ -266,27 +266,31 @@ export default function Dashboard() {
     return `Cover Letter${date ? ` (${date})` : ""}`;
   }
 
-  // Helper to get the label for improvements
-  function getImprovementLabel(improvement: any, mobile: boolean = false) {
-    const maxWords = mobile ? 10 : 20;
-    // Try all possible fields in order of preference
-    const candidates = [
-      improvement.section,
-      improvement.original,
-      improvement.suggestion,
-      improvement.issue,
-    ].filter(Boolean);
+  // Helper to generate a unique, user-friendly title for each improvement
+  function getImprovementTitle(improvement: any) {
+    // Compose a title using available fields, prioritizing section and issue
+    const section = improvement.section && improvement.section.trim();
+    const issue = improvement.issue && improvement.issue.trim();
+    const suggestion = improvement.suggestion && improvement.suggestion.trim();
+    const original = improvement.original && improvement.original.trim();
 
-    let label = candidates.find((val) => typeof val === "string" && val.trim());
-    if (label) {
-      const words = label.split(" ");
-      if (words.length > maxWords) {
-        label = words.slice(0, maxWords).join(" ") + "...";
-      }
-      return label;
+    let title = "";
+    if (section && issue) {
+      title = `Section: ${section} — Issue: ${issue}`;
+    } else if (section && suggestion) {
+      title = `Section: ${section} — Suggestion: ${suggestion}`;
+    } else if (section) {
+      title = `Section: ${section}`;
+    } else if (issue) {
+      title = `Issue: ${issue}`;
+    } else if (suggestion) {
+      title = `Suggestion: ${suggestion}`;
+    } else if (original) {
+      title = `Original: ${original}`;
+    } else {
+      title = "Resume Improvement";
     }
-    // Fallback if everything is missing
-    return "Resume Improvement";
+    return title;
   }
 
   if (authLoading || (loading && !userResumes.length)) {
@@ -454,43 +458,46 @@ export default function Dashboard() {
               <h3 className="text-xl font-semibold text-blue-500 mb-4">
                 Resume Improvement Suggestions
               </h3>
-              {allImprovements.length === 0 ? (
+              {!allImprovements[0]?.line_improvements ||
+              allImprovements[0].line_improvements.length === 0 ? (
                 <div className="text-center text-stone-400 py-8">
                   No improvements found for this resume.
                 </div>
               ) : (
                 <ul className="divide-y divide-stone-800">
-                  {allImprovements.map((improvement: any, index: number) => (
-                    <li key={index} className="flex items-center py-3 gap-2">
-                      <span
-                        className="flex-1 min-w-0 text-stone-100 font-medium truncate overflow-hidden whitespace-nowrap max-w-[16ch] sm:max-w-[ch] md:max-w-[28ch]"
-                        title={improvement.issue || undefined}
-                      >
-                        <span className="block sm:hidden font-light">
-                          {getImprovementLabel(improvement, true)}
+                  {allImprovements[0].line_improvements.map(
+                    (improvement: any, index: number) => (
+                      <li key={index} className="flex items-center py-3 gap-2">
+                        <span
+                          className="flex-1 min-w-0 text-stone-100 font-medium truncate overflow-hidden whitespace-nowrap max-w-[16ch] sm:max-w-[ch] md:max-w-[28ch]"
+                          title={improvement.issue || undefined}
+                        >
+                          <span className="block sm:hidden font-light">
+                            {getImprovementTitle(improvement)}
+                          </span>
+                          <span className="hidden sm:block">
+                            {getImprovementTitle(improvement)}
+                          </span>
                         </span>
-                        <span className="hidden sm:block">
-                          {getImprovementLabel(improvement, false)}
+                        <span className="mx-auto text-xs text-stone-400 w-24 text-center">
+                          {allImprovements[0].analyzed_at
+                            ? new Date(
+                                allImprovements[0].analyzed_at
+                              ).toLocaleDateString()
+                            : ""}
                         </span>
-                      </span>
-                      <span className="mx-auto text-xs text-stone-400 w-24 text-center">
-                        {improvement.analyzed_at
-                          ? new Date(
-                              improvement.analyzed_at
-                            ).toLocaleDateString()
-                          : ""}
-                      </span>
-                      <button
-                        onClick={() =>
-                          router.push(`/resume/analysis/${selectedResumeId}`)
-                        }
-                        className="text-blue-500 hover:underline text-sm bg-transparent border-none cursor-pointer p-0 m-0"
-                        type="button"
-                      >
-                        View Details
-                      </button>
-                    </li>
-                  ))}
+                        <button
+                          onClick={() =>
+                            router.push(`/resume/analysis/${selectedResumeId}`)
+                          }
+                          className="text-blue-500 hover:underline text-sm bg-transparent border-none cursor-pointer p-0 m-0"
+                          type="button"
+                        >
+                          View Details
+                        </button>
+                      </li>
+                    )
+                  )}
                 </ul>
               )}
             </div>

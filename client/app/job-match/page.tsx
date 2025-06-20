@@ -237,7 +237,7 @@ export default function JobMatchingPage() {
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           <h2 className="text-3xl tracking-wide text-blue-500 mb-20 text-center">
-            <p className="mb-12">Match job descriptions with your resume</p>
+            <p className="mb-6">Match job descriptions with your resume</p>
             <DividerSm />
           </h2>
 

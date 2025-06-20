@@ -6,28 +6,28 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useUserStore } from "@/lib/useUserStore";
+import DividerSm from "@/components/DividerSm";
 
 const questions = [
   {
     id: "motivation",
-    question: "What motivates you to apply for this position? (Optional)",
+    question: "What motivates you to apply for this position? ",
     placeholder: "I am excited about this opportunity because...",
   },
   {
     id: "experience",
-    question: "What relevant experience do you have for this role? (Optional)",
+    question: "What relevant experience do you have for this role? ",
     placeholder: "In my previous roles, I have...",
   },
   {
     id: "skills",
-    question:
-      "What specific skills make you a good fit for this position? (Optional)",
+    question: "What specific skills make you a good fit for this position? ",
     placeholder: "My key skills include...",
   },
   {
     id: "goals",
     question:
-      "What are your career goals and how does this position align with them? (Optional)",
+      "What are your career goals and how does this position align with them? ",
     placeholder: "My career goals include...",
   },
 ];
@@ -141,39 +141,38 @@ export default function CoverLetterPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 space-y-8">
-      <h1 className="text-3xl font-bold">Generate Cover Letter</h1>
+    <div className="container mx-auto py-8 space-y-8 bg-stone-950 min-h-screen">
+      <h2 className="text-3xl tracking-wide text-blue-500 mb-12 text-center">
+        <p className="mb-6">Generate Cover Letters Based On Job Description</p>
+        <DividerSm />
+      </h2>
 
       {generatedCoverLetter ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Generated Cover Letter</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="whitespace-pre-wrap mb-6">
-              {generatedCoverLetter}
-            </div>
-            <Button onClick={handleBackToForm} className="w-full max-w-md">
-              Back
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="bg-stone-950 text-stone-100 rounded-xl shadow-lg border border-stone-700 mx-auto  mt-8">
+          <div className="whitespace-pre-wrap mb-6">{generatedCoverLetter}</div>
+          <Button
+            onClick={handleBackToForm}
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-light rounded-md shadow-md transition-all duration-200"
+          >
+            Back
+          </Button>
+        </div>
       ) : (
-        <>
-          <Card>
-            <CardHeader>
-              <CardTitle>Select Resume (Optional)</CardTitle>
-            </CardHeader>
-            <CardContent>
+        <div className="bg-stone-950 border-none text-stone-100 pt-6 rounded-xl shadow-lg border border-stone-700 mx-auto  mt-8">
+          <div className="space-y-6">
+            <div>
+              <label className="block text-xl mb-2 font-medium text-stone-200">
+                Select Resume
+              </label>
               {resumesLoading ? (
                 <div className="flex items-center justify-center p-4">
-                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
                 </div>
               ) : (
                 <select
                   value={selectedResumeId}
                   onChange={(e) => setSelectedResumeId(e.target.value)}
-                  className="w-full rounded-md border border-stone-700 bg-stone-900/70 text-stone-100 placeholder:text-stone-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-4 transition-colors"
+                  className="w-full p-4 py-2 rounded-md border border-stone-700 bg-stone-900/70 text-stone-100 placeholder:text-stone-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-4 transition-colors"
                 >
                   <option value="">No resume selected</option>
                   {resumes.map((resume) => (
@@ -182,19 +181,19 @@ export default function CoverLetterPage() {
                       value={resume.id}
                       className="text-stone-100 bg-stone-900"
                     >
-                      {resume.filename || resume.name || `Resume ${resume.id}`}
+                      {resume.filename ||
+                        resume.name ||
+                        resume.original_filename ||
+                        `Resume ${resume.id}`}
                     </option>
                   ))}
                 </select>
               )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Job Description</CardTitle>
-            </CardHeader>
-            <CardContent>
+            </div>
+            <div>
+              <label className="block mb-2 text-xl font-medium text-stone-200">
+                Job Description
+              </label>
               <textarea
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
@@ -202,45 +201,45 @@ export default function CoverLetterPage() {
                 className="w-full h-32 rounded-md border border-stone-700 bg-stone-900/70 text-stone-100 placeholder:text-stone-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-4 py-2 transition-colors"
                 required
               />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Additional Information (Optional)</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {questions.map((q) => (
-                <div key={q.id}>
-                  <label className="block mb-2 font-medium">{q.question}</label>
-                  <textarea
-                    value={answers[q.id] || ""}
-                    onChange={(e) => handleAnswerChange(q.id, e.target.value)}
-                    placeholder={q.placeholder}
-                    className="w-full h-24 rounded-md border border-stone-700 bg-stone-900/70 text-stone-100 placeholder:text-stone-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-4 py-2 transition-colors"
-                  />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          <div className="flex justify-center">
-            <Button
-              onClick={handleGenerate}
-              disabled={loading}
-              className="w-full max-w-md"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                "Generate Cover Letter"
-              )}
-            </Button>
+            </div>
+            <div>
+              <label className="block mb-4 font-medium text-stone-200 text-xl">
+                Additional Information (Optional)
+              </label>
+              <div className="space-y-4">
+                {questions.map((q) => (
+                  <div key={q.id}>
+                    <label className="block mb-2 font-light text-stone-200">
+                      {q.question}
+                    </label>
+                    <textarea
+                      value={answers[q.id] || ""}
+                      onChange={(e) => handleAnswerChange(q.id, e.target.value)}
+                      placeholder={q.placeholder}
+                      className="w-full h-24 rounded-md border border-stone-700 bg-stone-900/70 text-stone-100 placeholder:text-stone-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-4 py-2 transition-colors"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-center">
+              <Button
+                onClick={handleGenerate}
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-light rounded-md shadow-md transition-all duration-200"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin text-white" />
+                    Generating...
+                  </>
+                ) : (
+                  "Generate Cover Letter"
+                )}
+              </Button>
+            </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

@@ -258,52 +258,59 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-stone-950 flex flex-col items-center ">
       <div className="w-full flex flex-col gap-10">
-        <Card className="bg-stone-950 border-2 border-dashed border-stone-700 hover:border-blue-500/0 transition-colors duration-200 group pt-6">
-          <CardContent className="">
-            <label className="cursor-pointer w-full h-full flex flex-col gap-4  items-center justify-center text-center">
-              <Input
-                ref={uploadInputRef}
-                type="file"
-                accept=".pdf,.doc,.docx,.txt"
-                onChange={handleDashboardFileChange}
-                className="hidden"
-                disabled={uploadLoading}
-              />
-              {uploadFile ? (
-                <>
-                  <FileText className="w-16 h-16 text-green-500" />
-                  <h3 className="text-xl text-stone-100">File Selected</h3>
-                  <p className="text-stone-400">{uploadFile.name}</p>
-                </>
-              ) : (
-                <>
-                  <Upload className="w-16 h-16 text-blue-500 group-hover:text-blue-400 transition-colors duration-200" />
-                  <h3 className="text-xl text-stone-100">
-                    Drop your resume here
-                  </h3>
-                  <p className="text-stone-400">or click to browse</p>
-                </>
-              )}
-              <p className="text-sm text-stone-500">
-                Supports: PDF, DOC, DOCX, TXT
-              </p>
-              <Button
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleDashboardUpload();
-                }}
-                disabled={uploadLoading || !uploadFile}
-                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white mt-4"
-              >
-                {uploadLoading ? "Uploading..." : "Upload Resume"}
-              </Button>
-            </label>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col gap-5">
+          {" "}
+          <h2 className="text-blue-500 text-2xl font-semibold">
+            Upload a resume
+          </h2>
+          <Card className="bg-stone-950 border-2 border-dashed border-stone-700 hover:border-blue-500/0 transition-colors duration-200 group pt-6">
+            <CardContent className="">
+              <label className="cursor-pointer w-full h-full flex flex-col gap-4  items-center justify-center text-center">
+                <Input
+                  ref={uploadInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx,.txt"
+                  onChange={handleDashboardFileChange}
+                  className="hidden"
+                  disabled={uploadLoading}
+                />
+                {uploadFile ? (
+                  <>
+                    <FileText className="w-16 h-16 text-green-500" />
+                    <h3 className="text-xl text-stone-100">File Selected</h3>
+                    <p className="text-stone-400">{uploadFile.name}</p>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-16 h-16 text-blue-500 group-hover:text-blue-400 transition-colors duration-200" />
+                    <h3 className="text-xl text-stone-100">
+                      Drop your resume here
+                    </h3>
+                    <p className="text-stone-400">or click to browse</p>
+                  </>
+                )}
+                <p className="text-sm text-stone-500">
+                  Supports: PDF, DOC, DOCX, TXT
+                </p>
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDashboardUpload();
+                  }}
+                  disabled={uploadLoading || !uploadFile}
+                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white mt-4"
+                >
+                  {uploadLoading ? "Uploading..." : "Upload Resume"}
+                </Button>
+              </label>
+            </CardContent>
+          </Card>
+        </div>
+
         <DividerSm />
-        <div className="">
-          <p className=" text-2xl text-blue-500 mb-5">View Resume Results</p>
-          <DropdownMenu>
+        <div className="flex flex-col gap-5">
+          <h2 className="text-blue-500 text-2xl font-semibold">View Resumes</h2>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="default"
@@ -315,6 +322,7 @@ export default function Dashboard() {
             <DropdownMenuContent
               className="w-full  bg-stone-950 border border-stone-700 shadow-lg"
               align="end"
+              modal={false}
             >
               <DropdownMenuLabel className="text-stone-400 px-4 py-2">
                 My Account

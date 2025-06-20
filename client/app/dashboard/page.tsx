@@ -225,13 +225,68 @@ export default function Dashboard() {
     setCoverLetters([]);
   };
 
-  // Helper to truncate resume name after 10 words
-  function truncateResumeName(name: string) {
-    const words = name.split(" ");
-    if (words.length > 10) {
-      return words.slice(0, 10).join(" ") + "...";
+  // Helper to truncate by word count
+  function truncateWords(text: string, maxWords: number) {
+    if (!text) return "";
+    const words = text.split(" ");
+    if (words.length > maxWords) {
+      return words.slice(0, maxWords).join(" ") + "...";
     }
-    return name;
+    return text;
+  }
+
+  function getCoverLetterLabel(letter: any, mobile: boolean = false) {
+    // Prefer job_title, then job_description, then resume_filename, then fallback
+    const maxWords = mobile ? 10 : 20;
+    if (letter.job_title && letter.job_title.trim()) {
+      return (
+        truncateWords(letter.job_title, maxWords) +
+        (letter.job_title.split(" ").length > maxWords ? "..." : "")
+      );
+    }
+    if (letter.job_description && letter.job_description.trim()) {
+      return (
+        truncateWords(letter.job_description, maxWords) +
+        (letter.job_description.split(" ").length > maxWords ? "..." : "")
+      );
+    }
+    if (letter.resume_filename && letter.resume_filename.trim()) {
+      return (
+        truncateWords(`Cover Letter for ${letter.resume_filename}`, maxWords) +
+        (`Cover Letter for ${letter.resume_filename}`.split(" ").length >
+        maxWords
+          ? "..."
+          : "")
+      );
+    }
+    // Fallback: Cover Letter + date
+    const date = letter.created_at
+      ? new Date(letter.created_at).toLocaleDateString()
+      : "";
+    return `Cover Letter${date ? ` (${date})` : ""}`;
+  }
+
+  // Helper to get the label for improvements
+  function getImprovementLabel(improvement: any, mobile: boolean = false) {
+    const maxWords = mobile ? 10 : 20;
+    // Try all possible fields in order of preference
+    const candidates = [
+      improvement.section,
+      improvement.original,
+      improvement.suggestion,
+      improvement.issue,
+    ].filter(Boolean);
+
+    let label = candidates.find((val) => typeof val === "string" && val.trim());
+    if (label) {
+      const words = label.split(" ");
+      if (words.length > maxWords) {
+        label = words.slice(0, maxWords).join(" ") + "...";
+      }
+      return label;
+    }
+    // Fallback if everything is missing
+    return "Resume Improvement";
   }
 
   if (authLoading || (loading && !userResumes.length)) {
@@ -273,6 +328,9 @@ export default function Dashboard() {
 
   // Flatten all improvements from all analyses
   const allImprovements = analyses[0]?.analyses || [];
+
+  console.log("analyses:", analyses);
+  console.log("allImprovements:", allImprovements);
 
   return (
     <div className=" bg-stone-950 flex flex-col items-center ">
@@ -337,13 +395,27 @@ export default function Dashboard() {
                 variant="default"
                 className=" text-white w-52 flex gap-8 truncate max-w-full justify-between"
               >
-                <span className="truncate overflow-hidden whitespace-nowrap max-w-[20ch] font-light">
-                  {selectedResumeId
-                    ? truncateResumeName(
-                        userResumes.find((r) => r.id === selectedResumeId)
-                          ?.original_filename || ""
-                      )
-                    : "Select a Resume"}
+                <span className="truncate overflow-hidden whitespace-nowrap max-w-[12ch] sm:max-w-[20ch] md:max-w-[28ch] font-light">
+                  {selectedResumeId ? (
+                    <>
+                      <span className="block sm:hidden">
+                        {truncateWords(
+                          userResumes.find((r) => r.id === selectedResumeId)
+                            ?.original_filename || "",
+                          10
+                        )}
+                      </span>
+                      <span className="hidden sm:block">
+                        {truncateWords(
+                          userResumes.find((r) => r.id === selectedResumeId)
+                            ?.original_filename || "",
+                          20
+                        )}
+                      </span>
+                    </>
+                  ) : (
+                    "Select a Resume"
+                  )}
                 </span>
                 <ChevronDownIcon className="h-4 w-4" />
               </Button>
@@ -357,7 +429,12 @@ export default function Dashboard() {
                   key={resume.id}
                   onSelect={() => handleSelectResume(resume.id)}
                 >
-                  {truncateResumeName(resume.original_filename)}
+                  <span className="block sm:hidden">
+                    {truncateWords(resume.original_filename, 10)}
+                  </span>
+                  <span className="hidden sm:block">
+                    {truncateWords(resume.original_filename, 20)}
+                  </span>
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
@@ -384,12 +461,24 @@ export default function Dashboard() {
               ) : (
                 <ul className="divide-y divide-stone-800">
                   {allImprovements.map((improvement: any, index: number) => (
-                    <li
-                      key={index}
-                      className="flex items-center justify-between py-3"
-                    >
-                      <span className="text-stone-100 font-medium">
-                        {improvement.section}
+                    <li key={index} className="flex items-center py-3 gap-2">
+                      <span
+                        className="flex-1 min-w-0 text-stone-100 font-medium truncate overflow-hidden whitespace-nowrap max-w-[16ch] sm:max-w-[ch] md:max-w-[28ch]"
+                        title={improvement.issue || undefined}
+                      >
+                        <span className="block sm:hidden font-light">
+                          {getImprovementLabel(improvement, true)}
+                        </span>
+                        <span className="hidden sm:block">
+                          {getImprovementLabel(improvement, false)}
+                        </span>
+                      </span>
+                      <span className="mx-auto text-xs text-stone-400 w-24 text-center">
+                        {improvement.analyzed_at
+                          ? new Date(
+                              improvement.analyzed_at
+                            ).toLocaleDateString()
+                          : ""}
                       </span>
                       <button
                         onClick={() =>
@@ -418,22 +507,30 @@ export default function Dashboard() {
               ) : (
                 <ul className="divide-y divide-stone-800">
                   {jobMatches.map((match: any) => (
-                    <li
-                      key={match.id}
-                      className="flex items-center justify-between py-3"
-                    >
-                      <div>
-                        <span className="text-stone-100 font-medium">
-                          {match.job_title ||
-                            match.company_name ||
-                            "Job Title Not Available"}
+                    <li key={match.id} className="flex items-center py-3 gap-2">
+                      <span className="flex-1 min-w-0 text-stone-100 font-medium truncate overflow-hidden whitespace-nowrap max-w-[16ch] sm:max-w-[ch] md:max-w-[28ch]">
+                        <span className="block sm:hidden font-light">
+                          {truncateWords(
+                            match.job_title ||
+                              match.company_name ||
+                              "Job Title Not Available",
+                            10
+                          )}
                         </span>
-                        {match.created_at && (
-                          <span className="ml-2 text-xs text-stone-400">
-                            {new Date(match.created_at).toLocaleDateString()}
-                          </span>
-                        )}
-                      </div>
+                        <span className="hidden sm:block">
+                          {truncateWords(
+                            match.job_title ||
+                              match.company_name ||
+                              "Job Title Not Available",
+                            20
+                          )}
+                        </span>
+                      </span>
+                      <span className="mx-auto text-xs text-stone-400 w-24 text-center">
+                        {match.created_at
+                          ? new Date(match.created_at).toLocaleDateString()
+                          : ""}
+                      </span>
                       <button
                         onClick={() => router.push(`/job-match/${match.id}`)}
                         className="text-blue-500 hover:underline text-sm bg-transparent border-none cursor-pointer p-0 m-0"
@@ -448,7 +545,7 @@ export default function Dashboard() {
             </div>
 
             {/* Cover Letters Section */}
-            <div className="mt-8">
+            <div className="my-8 ">
               <h3 className="text-xl font-semibold text-blue-500 mb-4">
                 Generated Cover Letters
               </h3>
@@ -461,18 +558,21 @@ export default function Dashboard() {
                   {coverLetters.map((letter: any) => (
                     <li
                       key={letter.id}
-                      className="flex items-center justify-between py-3"
+                      className="flex items-center py-3 gap-2"
                     >
-                      <div>
-                        <span className="text-stone-100 font-medium">
-                          Cover Letter
+                      <span className="flex-1 min-w-0 text-stone-100 font-medium truncate overflow-hidden whitespace-nowrap max-w-[12ch] sm:max-w-[20h] md:max-w-[28ch]">
+                        <span className="block sm:hidden">
+                          {getCoverLetterLabel(letter, true)}
                         </span>
-                        {letter.created_at && (
-                          <span className="ml-2 text-xs text-stone-400">
-                            {new Date(letter.created_at).toLocaleDateString()}
-                          </span>
-                        )}
-                      </div>
+                        <span className="hidden sm:block">
+                          {getCoverLetterLabel(letter, false)}
+                        </span>
+                      </span>
+                      <span className="mx-auto text-xs text-stone-400 w-24 text-center">
+                        {letter.created_at
+                          ? new Date(letter.created_at).toLocaleDateString()
+                          : ""}
+                      </span>
                       <button
                         onClick={() =>
                           router.push(`/cover-letter/${letter.id}`)

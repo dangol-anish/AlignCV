@@ -27,6 +27,7 @@
     "@supabase/supabase-js": "^2.49.10",
     "@types/jsonwebtoken": "^9.0.9",
     "cors": "^2.8.5",
+    "docx": "^9.5.1",
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
     "file-type": "^21.0.0",

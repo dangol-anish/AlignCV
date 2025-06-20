@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { useUserStore } from "@/lib/useUserStore";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Printer, Pencil } from "lucide-react";
+import { Printer, Pencil, FileDown, FileText, Loader2 } from "lucide-react";
 
 interface CoverLetter {
   id: string;
@@ -27,6 +27,7 @@ export default function CoverLetterContent() {
   const [coverLetter, setCoverLetter] = useState<CoverLetter | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState<"pdf" | "docx" | null>(null);
 
   useEffect(() => {
     const fetchCoverLetter = async () => {
@@ -78,6 +79,42 @@ export default function CoverLetterContent() {
     fetchCoverLetter();
   }, [id, user?.token]);
 
+  const handleDownload = async (type: "pdf" | "docx") => {
+    setDownloading(type);
+    try {
+      const endpoint = `/api/cover-letter/${id}/${type}`;
+      const res = await fetch(endpoint, {
+        headers: { Authorization: `Bearer ${user?.token}` },
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        alert(`Failed to download ${type.toUpperCase()}: ${text}`);
+        console.error(`Download error for ${type}:`, text);
+        return;
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = `cover-letter-${id}.${type}`;
+      document.body.appendChild(a);
+      setTimeout(() => {
+        a.click();
+        setTimeout(() => {
+          window.URL.revokeObjectURL(url);
+          a.remove();
+        }, 3000);
+      }, 100);
+      console.log(`Download for ${type} triggered.`);
+    } catch (err) {
+      alert(`Unexpected error: ${err}`);
+      console.error("Unexpected download error:", err);
+    } finally {
+      setDownloading(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -114,7 +151,7 @@ export default function CoverLetterContent() {
 
   return (
     <div className="flex flex-col gap-4 ">
-      <div className="bg-stone-950 text-stone-100 rounded-xl shadow-lg p-8  border border-stone-700/50">
+      <div className="bg-stone-950 text-stone-100 rounded-xl shadow-lg  mb-8">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <h1 className="text-2xl font-bold text-blue-500 mb-2 md:mb-0 text-center md:text-left md:w-auto">
             {coverLetter.job_title}
@@ -122,18 +159,37 @@ export default function CoverLetterContent() {
           <div className="flex gap-2 w-full md:w-auto justify-center md:justify-end"></div>
         </div>
         <div className="prose  prose-invert">
-          <div className="whitespace-pre-wrap font-mono text-stone-100 text-lg leading-relaxed">
+          <div className="whitespace-pre-wrap font-mono text-stone-300 text-md leading-relaxed">
             {coverLetter.cover_letter}
           </div>
         </div>
+        <div className="flex flex-col sm:flex-row gap-4 mt-8">
+          <Button
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-stone-100 font-light rounded-md shadow-md transition-all duration-200 flex items-center justify-center gap-2"
+            disabled={downloading === "pdf"}
+            onClick={() => handleDownload("pdf")}
+          >
+            {downloading === "pdf" ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <FileDown className="h-5 w-5" />
+            )}
+            PDF
+          </Button>
+          <Button
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-stone-100 font-light rounded-md shadow-md transition-all duration-200 flex items-center justify-center gap-2"
+            disabled={downloading === "docx"}
+            onClick={() => handleDownload("docx")}
+          >
+            {downloading === "docx" ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <FileText className="h-5 w-5" />
+            )}
+            DOCX
+          </Button>
+        </div>
       </div>
-      <Button
-        className="w-full bg-gradient-to-r  from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-stone-100 font-light rounded-md shadow-md transition-all duration-200 mt-4"
-        onClick={() => window.print()}
-      >
-        <Printer className="h-5 w-5 mr-2" />
-        Print
-      </Button>
     </div>
   );
 }

@@ -3,6 +3,8 @@ import {
   generateCoverLetter,
   getCoverLettersForUser,
   getCoverLetterById,
+  downloadCoverLetterPdf,
+  downloadCoverLetterDocx,
 } from "../controllers/coverLetterController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
@@ -16,5 +18,11 @@ router.get("/", authMiddleware, getCoverLettersForUser);
 
 // GET /api/cover-letter/:id
 router.get("/:id", authMiddleware, getCoverLetterById);
+
+// GET /api/cover-letter/:id/pdf
+router.get("/:id/pdf", authMiddleware, downloadCoverLetterPdf);
+
+// GET /api/cover-letter/:id/docx
+router.get("/:id/docx", authMiddleware, downloadCoverLetterDocx);
 
 export default router;

@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, ChevronDownIcon, FileText, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import DividerSm from "@/components/DividerSm";
 
 export default function Dashboard() {
   const [analyses, setAnalyses] = useState<any[]>([]);
@@ -256,8 +257,8 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-stone-950 flex flex-col items-center ">
-      <div className="w-full">
-        <Card className="bg-stone-950 border-2 border-dashed border-stone-700 hover:border-blue-500/20 transition-colors duration-200 group pt-6">
+      <div className="w-full flex flex-col gap-10">
+        <Card className="bg-stone-950 border-2 border-dashed border-stone-700 hover:border-blue-500/0 transition-colors duration-200 group pt-6">
           <CardContent className="">
             <label className="cursor-pointer w-full h-full flex flex-col gap-4  items-center justify-center text-center">
               <Input
@@ -299,166 +300,41 @@ export default function Dashboard() {
             </label>
           </CardContent>
         </Card>
-
-        {/* Uploaded Resumes Section */}
-        <Card className="bg-stone-950 border-stone-800 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent font-bold">
-              Your Uploaded Resumes
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {userResumes.length === 0 ? (
-              <div className="text-center text-stone-400 py-8">
-                No resumes found. Upload a resume to get started.
-              </div>
-            ) : (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between">
-                    <span>
-                      {selectedResumeId
-                        ? userResumes.find((r) => r.id === selectedResumeId)
-                            ?.original_filename
-                        : "Select a Resume"}
-                    </span>
-                    <ChevronDownIcon className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-full">
-                  <DropdownMenuLabel>Your Resumes</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {userResumes.map((resume) => (
-                    <DropdownMenuItem
-                      key={resume.id}
-                      onSelect={() => handleSelectResume(resume.id)}
-                    >
-                      {resume.original_filename}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </CardContent>
-        </Card>
-
-        {loading && selectedResumeId && (
-          <div className="text-center text-stone-400 py-8">Loading data...</div>
-        )}
-
-        {selectedResumeId && !loading && (
-          <>
-            {/* Resume Improvements Section */}
-            <Card className="bg-stone-950 border-stone-800 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-2xl bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent font-bold">
-                  Resume Improvements
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {allImprovements.length === 0 ? (
-                  <div className="text-center text-stone-400 py-8">
-                    No improvements found for this resume.
-                  </div>
-                ) : (
-                  <ScrollArea className="h-[300px] w-full">
-                    <div className="space-y-4">
-                      {allImprovements.map(
-                        (improvement: any, index: number) => (
-                          <div key={index} className="space-y-2">
-                            <Card className="bg-stone-900 border-stone-800 ">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <h3 className="font-semibold text-stone-100">
-                                    {improvement.section}
-                                  </h3>
-                                  <p className="text-sm text-stone-400">
-                                    {improvement.suggestion}
-                                  </p>
-                                </div>
-                                <Badge
-                                  variant="outline"
-                                  className="border-purple-500 text-purple-500"
-                                >
-                                  Improvement
-                                </Badge>
-                              </div>
-                            </Card>
-                            <Separator className="bg-stone-800" />
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </ScrollArea>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Job Matches Section */}
-            <Card className="bg-stone-950 border-stone-800 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-2xl bg-gradient-to-r from-green-500 to-green-600 bg-clip-text text-transparent font-bold">
-                  Job Matches
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {jobMatches.length === 0 ? (
-                  <div className="text-center text-stone-400 py-8">
-                    No job matches found for this resume.
-                  </div>
-                ) : (
-                  <ScrollArea className="h-[300px] w-full">
-                    <div className="space-y-4">
-                      {jobMatches.map((match) => (
-                        <div key={match.id} className="space-y-2">
-                          <Card
-                            onClick={() =>
-                              router.push(`/job-match/${match.id}`)
-                            }
-                            className="bg-stone-900 border-stone-800  cursor-pointer hover:bg-stone-800/80 transition-colors"
-                          >
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h3 className="font-semibold text-stone-100">
-                                  {match.job_title} at {match.company_name}
-                                </h3>
-                                <p className="text-sm text-stone-400">
-                                  {match.job_location}
-                                </p>
-                              </div>
-                              <Badge
-                                variant="outline"
-                                className="border-green-500 text-green-500"
-                              >
-                                Match: {match.match_score}%
-                              </Badge>
-                            </div>
-                          </Card>
-                          <Separator className="bg-stone-800" />
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Cover Letters Section */}
-            <Card className="bg-stone-950 border-stone-800 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-2xl bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent font-bold">
-                  Cover Letters
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CoverLetterList
-                  coverLetters={coverLetters}
-                  onDelete={handleDeleteCoverLetter}
-                />
-              </CardContent>
-            </Card>
-          </>
-        )}
+        <DividerSm />
+        <div className="">
+          <p className=" text-2xl text-blue-500 mb-5">View Resume Results</p>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="default"
+                className="text-stone-100 hover:text-blue-500 focus:ring-0 focus:outline-none w-full"
+              >
+                Choose a resume <ChevronDownIcon className="ml-2 w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-full  bg-stone-950 border border-stone-700 shadow-lg"
+              align="end"
+            >
+              <DropdownMenuLabel className="text-stone-400 px-4 py-2">
+                My Account
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-stone-700" />
+              <DropdownMenuItem className="hover:bg-blue-500 hover:text-white transition-colors duration-150 px-4 py-2">
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem className="hover:bg-blue-500 hover:text-white transition-colors duration-150 px-4 py-2">
+                Billing
+              </DropdownMenuItem>
+              <DropdownMenuItem className="hover:bg-blue-500 hover:text-white transition-colors duration-150 px-4 py-2">
+                Team
+              </DropdownMenuItem>
+              <DropdownMenuItem className="hover:bg-blue-500 hover:text-white transition-colors duration-150 px-4 py-2">
+                Subscription
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </div>
   );

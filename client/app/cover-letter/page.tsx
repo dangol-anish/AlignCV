@@ -128,6 +128,10 @@ export default function CoverLetterPage() {
     }
   };
 
+  const handleBackToForm = () => {
+    setGeneratedCoverLetter("");
+  };
+
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -140,92 +144,103 @@ export default function CoverLetterPage() {
     <div className="container mx-auto py-8 space-y-8">
       <h1 className="text-3xl font-bold">Generate Cover Letter</h1>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Select Resume (Optional)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {resumesLoading ? (
-            <div className="flex items-center justify-center p-4">
-              <Loader2 className="h-6 w-6 animate-spin" />
-            </div>
-          ) : (
-            <select
-              value={selectedResumeId}
-              onChange={(e) => setSelectedResumeId(e.target.value)}
-              className="w-full p-2 border rounded-md"
-            >
-              <option value="">No resume selected</option>
-              {resumes.map((resume) => (
-                <option key={resume.id} value={resume.id}>
-                  {resume.filename || resume.name || `Resume ${resume.id}`}
-                </option>
-              ))}
-            </select>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Job Description</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <textarea
-            value={jobDescription}
-            onChange={(e) => setJobDescription(e.target.value)}
-            placeholder="Paste the job description here..."
-            className="w-full h-32 p-2 border rounded-md"
-            required
-          />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Additional Information (Optional)</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {questions.map((q) => (
-            <div key={q.id}>
-              <label className="block mb-2 font-medium">{q.question}</label>
-              <textarea
-                value={answers[q.id] || ""}
-                onChange={(e) => handleAnswerChange(q.id, e.target.value)}
-                placeholder={q.placeholder}
-                className="w-full h-24 p-2 border rounded-md"
-              />
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      <div className="flex justify-center">
-        <Button
-          onClick={handleGenerate}
-          disabled={loading}
-          className="w-full max-w-md"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Generating...
-            </>
-          ) : (
-            "Generate Cover Letter"
-          )}
-        </Button>
-      </div>
-
-      {generatedCoverLetter && (
+      {generatedCoverLetter ? (
         <Card>
           <CardHeader>
             <CardTitle>Generated Cover Letter</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="whitespace-pre-wrap">{generatedCoverLetter}</div>
+            <div className="whitespace-pre-wrap mb-6">
+              {generatedCoverLetter}
+            </div>
+            <Button onClick={handleBackToForm} className="w-full max-w-md">
+              Back
+            </Button>
           </CardContent>
         </Card>
+      ) : (
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle>Select Resume (Optional)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {resumesLoading ? (
+                <div className="flex items-center justify-center p-4">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                </div>
+              ) : (
+                <select
+                  value={selectedResumeId}
+                  onChange={(e) => setSelectedResumeId(e.target.value)}
+                  className="w-full rounded-md border border-stone-700 bg-stone-900/70 text-stone-100 placeholder:text-stone-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-4 transition-colors"
+                >
+                  <option value="">No resume selected</option>
+                  {resumes.map((resume) => (
+                    <option
+                      key={resume.id}
+                      value={resume.id}
+                      className="text-stone-100 bg-stone-900"
+                    >
+                      {resume.filename || resume.name || `Resume ${resume.id}`}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Job Description</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <textarea
+                value={jobDescription}
+                onChange={(e) => setJobDescription(e.target.value)}
+                placeholder="Paste the job description here..."
+                className="w-full h-32 rounded-md border border-stone-700 bg-stone-900/70 text-stone-100 placeholder:text-stone-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-4 py-2 transition-colors"
+                required
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Additional Information (Optional)</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {questions.map((q) => (
+                <div key={q.id}>
+                  <label className="block mb-2 font-medium">{q.question}</label>
+                  <textarea
+                    value={answers[q.id] || ""}
+                    onChange={(e) => handleAnswerChange(q.id, e.target.value)}
+                    placeholder={q.placeholder}
+                    className="w-full h-24 rounded-md border border-stone-700 bg-stone-900/70 text-stone-100 placeholder:text-stone-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-4 py-2 transition-colors"
+                  />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-center">
+            <Button
+              onClick={handleGenerate}
+              disabled={loading}
+              className="w-full max-w-md"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                "Generate Cover Letter"
+              )}
+            </Button>
+          </div>
+        </>
       )}
     </div>
   );

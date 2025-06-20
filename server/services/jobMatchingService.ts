@@ -57,7 +57,6 @@ export async function matchResumeToJob({
         resume_id: resumeId,
         job_description: jobDescription,
         company_name: companyName,
-        job_title: job_title,
         ai_analysis,
         match_score,
         strengths,

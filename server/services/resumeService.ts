@@ -46,12 +46,22 @@ export async function getResumeWithAnalysis(resumeId: string, userId: string) {
   return { resume, analysis };
 }
 
-export async function getResumeAnalysesForUser(userId: string) {
-  // Get all resumes for the user
-  const { data: resumes, error: resumesError } = await supabase
+export async function getResumeAnalysesForUser(
+  userId: string,
+  resumeId?: string
+) {
+  let resumeQuery = supabase
     .from(RESUMES_TABLE)
     .select("id, original_filename, uploaded_at")
     .eq("user_id", userId);
+
+  if (resumeId) {
+    resumeQuery = resumeQuery.eq("id", resumeId);
+  }
+
+  // Get all resumes for the user
+  const { data: resumes, error: resumesError } = await resumeQuery;
+
   if (resumesError) throw resumesError;
   if (!resumes) return [];
   // For each resume, get all analyses

@@ -152,12 +152,22 @@ export async function generateCoverLetter({
   return result;
 }
 
-export async function getCoverLettersForUser(userId: string) {
-  const { data, error } = await supabase
+export async function getCoverLettersForUser(
+  userId: string,
+  resumeId?: string
+) {
+  let query = supabase
     .from("cover_letters")
     .select("*, resumes(original_filename)")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+    .eq("user_id", userId);
+
+  if (resumeId) {
+    query = query.eq("resume_id", resumeId);
+  }
+
+  const { data, error } = await query.order("created_at", {
+    ascending: false,
+  });
 
   if (error) {
     console.error("Database error:", error);

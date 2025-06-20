@@ -35,16 +35,25 @@ export async function matchJob(req: Request, res: Response) {
 
 export async function getJobMatchesForUser(req: Request, res: Response) {
   const userId = (req as any).user?.id;
+  const { resume_id } = req.query;
+
   if (!userId) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
 
   try {
-    const { data: matches, error } = await supabase
+    let query = supabase
       .from("job_matching_results")
       .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
+      .eq("user_id", userId);
+
+    if (resume_id) {
+      query = query.eq("resume_id", resume_id as string);
+    }
+
+    const { data: matches, error } = await query.order("created_at", {
+      ascending: false,
+    });
 
     if (error) throw error;
 

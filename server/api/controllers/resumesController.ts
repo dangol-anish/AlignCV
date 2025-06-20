@@ -69,11 +69,16 @@ export async function referenceResumeForFeature(req: Request, res: Response) {
 
 export async function getAllResumeAnalysesForUser(req: Request, res: Response) {
   const userId = (req as any).user?.id;
+  const { resume_id } = req.query;
+
   if (!userId) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
   try {
-    const results = await getResumeAnalysesForUser(userId);
+    const results = await getResumeAnalysesForUser(
+      userId,
+      resume_id as string | undefined
+    );
     return res.json({ success: true, results });
   } catch (err: any) {
     return res.status(500).json({

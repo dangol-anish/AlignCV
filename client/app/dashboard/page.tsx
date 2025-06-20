@@ -21,7 +21,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDownIcon } from "lucide-react";
+import { ChevronDown, ChevronDownIcon, FileText, Upload } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 export default function Dashboard() {
   const [analyses, setAnalyses] = useState<any[]>([]);
@@ -39,6 +40,12 @@ export default function Dashboard() {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadLoading, setUploadLoading] = useState(false);
   const uploadInputRef = useRef<HTMLInputElement>(null);
+
+  // Scroll to top on mount to prevent browser restoring scroll position to bottom
+  useEffect(() => {
+    console.log("On mount, scrollY:", window.scrollY);
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -115,6 +122,12 @@ export default function Dashboard() {
       })
       .finally(() => setLoading(false));
   }, [user, selectedResumeId]);
+
+  useEffect(() => {
+    if (!loading) {
+      console.log("After loading, scrollY:", window.scrollY);
+    }
+  }, [loading]);
 
   const handleLogout = async () => {
     try {
@@ -239,42 +252,51 @@ export default function Dashboard() {
   }
 
   // Flatten all improvements from all analyses
-  const allImprovements = analyses.flatMap((item) =>
-    item.analyses.flatMap((analysis: any) => ({
-      ...analysis,
-      resume_filename: item.resume_filename,
-      resume_id: item.resume_id,
-    }))
-  );
+  const allImprovements = analyses[0]?.analyses || [];
 
   return (
-    <div className="min-h-screen bg-stone-950 flex flex-col items-center py-12 px-2">
-      <div className="w-full max-w-5xl space-y-10">
-        {/* Resume Upload Section */}
-        <Card className="bg-stone-950 border-stone-800 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent font-bold">
-              Upload a Resume
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col items-center gap-4">
-              <input
+    <div className="min-h-screen bg-stone-950 flex flex-col items-center ">
+      <div className="w-full">
+        <Card className="bg-stone-950 border-2 border-dashed border-stone-700 hover:border-blue-500/20 transition-colors duration-200 group pt-6">
+          <CardContent className="">
+            <label className="cursor-pointer w-full h-full flex flex-col gap-4  items-center justify-center text-center">
+              <Input
                 ref={uploadInputRef}
                 type="file"
                 accept=".pdf,.doc,.docx,.txt"
                 onChange={handleDashboardFileChange}
-                className="mb-2"
+                className="hidden"
                 disabled={uploadLoading}
               />
+              {uploadFile ? (
+                <>
+                  <FileText className="w-16 h-16 text-green-500" />
+                  <h3 className="text-xl text-stone-100">File Selected</h3>
+                  <p className="text-stone-400">{uploadFile.name}</p>
+                </>
+              ) : (
+                <>
+                  <Upload className="w-16 h-16 text-blue-500 group-hover:text-blue-400 transition-colors duration-200" />
+                  <h3 className="text-xl text-stone-100">
+                    Drop your resume here
+                  </h3>
+                  <p className="text-stone-400">or click to browse</p>
+                </>
+              )}
+              <p className="text-sm text-stone-500">
+                Supports: PDF, DOC, DOCX, TXT
+              </p>
               <Button
-                onClick={handleDashboardUpload}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDashboardUpload();
+                }}
                 disabled={uploadLoading || !uploadFile}
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white mt-4"
               >
-                {uploadLoading ? "Uploading..." : "Upload"}
+                {uploadLoading ? "Uploading..." : "Upload Resume"}
               </Button>
-            </div>
+            </label>
           </CardContent>
         </Card>
 
@@ -344,7 +366,7 @@ export default function Dashboard() {
                       {allImprovements.map(
                         (improvement: any, index: number) => (
                           <div key={index} className="space-y-2">
-                            <Card className="bg-stone-900 border-stone-800 p-4">
+                            <Card className="bg-stone-900 border-stone-800 ">
                               <div className="flex justify-between items-start">
                                 <div>
                                   <h3 className="font-semibold text-stone-100">
@@ -393,7 +415,7 @@ export default function Dashboard() {
                             onClick={() =>
                               router.push(`/job-match/${match.id}`)
                             }
-                            className="bg-stone-900 border-stone-800 p-4 cursor-pointer hover:bg-stone-800/80 transition-colors"
+                            className="bg-stone-900 border-stone-800  cursor-pointer hover:bg-stone-800/80 transition-colors"
                           >
                             <div className="flex justify-between items-start">
                               <div>

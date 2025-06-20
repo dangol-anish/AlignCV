@@ -40,12 +40,17 @@ export async function generateCoverLetter(req: Request, res: Response) {
 
 export async function getCoverLettersForUser(req: Request, res: Response) {
   const userId = (req as any).user?.id;
+  const { resume_id } = req.query;
+
   if (!userId) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
 
   try {
-    const results = await getCoverLettersService(userId);
+    const results = await getCoverLettersService(
+      userId,
+      resume_id as string | undefined
+    );
     return res.json({ success: true, results });
   } catch (err: any) {
     console.error("Error fetching cover letters:", err);

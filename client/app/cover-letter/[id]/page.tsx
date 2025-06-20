@@ -1,13 +1,7 @@
 import { Suspense } from "react";
 import CoverLetterContent from "./CoverLetterContent";
 
-interface PageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default async function CoverLetterPage({ params }: PageProps) {
+export default async function CoverLetterPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <Suspense
@@ -20,7 +14,7 @@ export default async function CoverLetterPage({ params }: PageProps) {
           </div>
         }
       >
-        <CoverLetterContent id={params.id} />
+        <CoverLetterContent />
       </Suspense>
     </div>
   );

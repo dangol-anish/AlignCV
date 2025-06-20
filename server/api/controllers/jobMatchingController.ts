@@ -7,14 +7,14 @@ import { supabase } from "../../database";
 
 export async function matchJob(req: Request, res: Response) {
   const userId = (req as any).user?.id;
-  const { resume_id, job_description } = req.body;
+  const { resume_id, job_description, company_name } = req.body;
   if (!userId) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
-  if (!resume_id || !job_description) {
+  if (!resume_id || !job_description || !company_name) {
     return res.status(400).json({
       success: false,
-      message: "Missing resume_id or job_description",
+      message: "Missing resume_id, job_description, or company_name",
     });
   }
   try {
@@ -22,6 +22,7 @@ export async function matchJob(req: Request, res: Response) {
       userId,
       resumeId: resume_id,
       jobDescription: job_description,
+      companyName: company_name,
     });
     return res.json({ success: true, result });
   } catch (err: any) {

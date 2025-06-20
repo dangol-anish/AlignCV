@@ -328,7 +328,9 @@ export default function Dashboard() {
 
         <DividerSm />
         <div className="flex justify-between   gap-5">
-          <h2 className="text-blue-500 text-2xl font-semibold">View Resumes</h2>
+          <h2 className="text-blue-500 text-2xl font-semibold">
+            View Resumes Details
+          </h2>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -351,7 +353,7 @@ export default function Dashboard() {
               <DropdownMenuSeparator />
               {userResumes.map((resume) => (
                 <DropdownMenuItem
-                  className="truncate overflow-hidden whitespace-nowrap max-w-[24ch]"
+                  className="truncate overflow-hidden whitespace-nowrap max-w-[24ch] hover:text-blue-500 hover:bg-blue-500"
                   key={resume.id}
                   onSelect={() => handleSelectResume(resume.id)}
                 >
@@ -364,162 +366,125 @@ export default function Dashboard() {
 
         {/* Uploaded Resumes Section */}
 
-        <Card className="bg-stone-950 border-stone-800 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent font-bold">
-              Your Uploaded Resumes
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {userResumes.length === 0 ? (
-              <div className="text-center text-stone-400 py-8">
-                No resumes found. Upload a resume to get started.
-              </div>
-            ) : (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between">
-                    <span className="truncate overflow-hidden whitespace-nowrap max-w-[10ch]">
-                      {selectedResumeId
-                        ? truncateResumeName(
-                            userResumes.find((r) => r.id === selectedResumeId)
-                              ?.original_filename || ""
-                          )
-                        : "Select a Resume"}
-                    </span>
-                    <ChevronDownIcon className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-full">
-                  <DropdownMenuLabel>Your Resumes</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {userResumes.map((resume) => (
-                    <DropdownMenuItem
-                      className="truncate overflow-hidden whitespace-nowrap max-w-[24ch]"
-                      key={resume.id}
-                      onSelect={() => handleSelectResume(resume.id)}
-                    >
-                      {truncateResumeName(resume.original_filename)}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </CardContent>
-        </Card>
-
         {loading && selectedResumeId && (
           <div className="text-center text-stone-400 py-8">Loading data...</div>
         )}
 
         {selectedResumeId && !loading && (
           <>
-            <Card className="bg-stone-950 border-stone-800 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-2xl bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent font-bold">
-                  Resume Improvements
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {allImprovements.length === 0 ? (
-                  <div className="text-center text-stone-400 py-8">
-                    No improvements found for this resume.
-                  </div>
-                ) : (
-                  <ScrollArea className="h-[300px] w-full">
-                    <div className="space-y-4">
-                      {allImprovements.map(
-                        (improvement: any, index: number) => (
-                          <div key={index} className="space-y-2">
-                            <Card className="bg-stone-900 border-stone-800 ">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <h3 className="font-semibold text-stone-100">
-                                    {improvement.section}
-                                  </h3>
-                                  <p className="text-sm text-stone-400">
-                                    {improvement.suggestion}
-                                  </p>
-                                </div>
-                                <Badge
-                                  variant="outline"
-                                  className="border-purple-500 text-purple-500"
-                                >
-                                  Improvement
-                                </Badge>
-                              </div>
-                            </Card>
-                            <Separator className="bg-stone-800" />
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </ScrollArea>
-                )}
-              </CardContent>
-            </Card>
+            {/* Resume Improvements Section */}
+            <div className="mt-8">
+              <h3 className="text-xl font-semibold text-blue-500 mb-4">
+                Resume Improvement Suggestions
+              </h3>
+              {allImprovements.length === 0 ? (
+                <div className="text-center text-stone-400 py-8">
+                  No improvements found for this resume.
+                </div>
+              ) : (
+                <ul className="divide-y divide-stone-800">
+                  {allImprovements.map((improvement: any, index: number) => (
+                    <li
+                      key={index}
+                      className="flex items-center justify-between py-3"
+                    >
+                      <span className="text-stone-100 font-medium">
+                        {improvement.section}
+                      </span>
+                      <button
+                        onClick={() =>
+                          router.push(`/resume/analysis/${selectedResumeId}`)
+                        }
+                        className="text-blue-500 hover:underline text-sm bg-transparent border-none cursor-pointer p-0 m-0"
+                        type="button"
+                      >
+                        View Details
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
 
-            <Card className="bg-stone-950 border-stone-800 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-2xl bg-gradient-to-r from-green-500 to-green-600 bg-clip-text text-transparent font-bold">
-                  Job Matches
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {jobMatches.length === 0 ? (
-                  <div className="text-center text-stone-400 py-8">
-                    No job matches found for this resume.
-                  </div>
-                ) : (
-                  <ScrollArea className="h-[300px] w-full">
-                    <div className="space-y-4">
-                      {jobMatches.map((match) => (
-                        <div key={match.id} className="space-y-2">
-                          <Card
-                            onClick={() =>
-                              router.push(`/job-match/${match.id}`)
-                            }
-                            className="bg-stone-900 border-stone-800  cursor-pointer hover:bg-stone-800/80 transition-colors"
-                          >
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h3 className="font-semibold text-stone-100">
-                                  {match.job_title} at {match.company_name}
-                                </h3>
-                                <p className="text-sm text-stone-400">
-                                  {match.job_location}
-                                </p>
-                              </div>
-                              <Badge
-                                variant="outline"
-                                className="border-green-500 text-green-500"
-                              >
-                                Match: {match.match_score}%
-                              </Badge>
-                            </div>
-                          </Card>
-                          <Separator className="bg-stone-800" />
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                )}
-              </CardContent>
-            </Card>
+            {/* Job Matches Section */}
+            <div className="mt-8">
+              <h3 className="text-xl font-semibold text-blue-500 mb-4">
+                Recommended Job Matches
+              </h3>
+              {jobMatches.length === 0 ? (
+                <div className="text-center text-stone-400 py-8">
+                  No job matches found for this resume.
+                </div>
+              ) : (
+                <ul className="divide-y divide-stone-800">
+                  {jobMatches.map((match: any) => (
+                    <li
+                      key={match.id}
+                      className="flex items-center justify-between py-3"
+                    >
+                      <div>
+                        <span className="text-stone-100 font-medium">
+                          {match.job_title} at {match.company_name}
+                        </span>
+                        {match.created_at && (
+                          <span className="ml-2 text-xs text-stone-400">
+                            {new Date(match.created_at).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => router.push(`/job-match/${match.id}`)}
+                        className="text-blue-500 hover:underline text-sm bg-transparent border-none cursor-pointer p-0 m-0"
+                        type="button"
+                      >
+                        View Details
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
 
-            <Card className="bg-stone-950 border-stone-800 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-2xl bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent font-bold">
-                  Cover Letters
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CoverLetterList
-                  coverLetters={coverLetters}
-                  onDelete={handleDeleteCoverLetter}
-                />
-              </CardContent>
-            </Card>
+            {/* Cover Letters Section */}
+            <div className="mt-8">
+              <h3 className="text-xl font-semibold text-blue-500 mb-4">
+                Generated Cover Letters
+              </h3>
+              {coverLetters.length === 0 ? (
+                <div className="text-center text-stone-400 py-8">
+                  No cover letters found for this resume.
+                </div>
+              ) : (
+                <ul className="divide-y divide-stone-800">
+                  {coverLetters.map((letter: any) => (
+                    <li
+                      key={letter.id}
+                      className="flex items-center justify-between py-3"
+                    >
+                      <div>
+                        <span className="text-stone-100 font-medium">
+                          Cover Letter
+                        </span>
+                        {letter.created_at && (
+                          <span className="ml-2 text-xs text-stone-400">
+                            {new Date(letter.created_at).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() =>
+                          router.push(`/cover-letter/${letter.id}`)
+                        }
+                        className="text-blue-500 hover:underline text-sm bg-transparent border-none cursor-pointer p-0 m-0"
+                        type="button"
+                      >
+                        View Details
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </>
         )}
       </div>

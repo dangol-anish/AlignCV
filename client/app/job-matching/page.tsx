@@ -19,6 +19,7 @@ export default function JobMatchingPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<any>(null);
   const authLoading = useUserStore((state) => state.authLoading);
+  const [companyName, setCompanyName] = useState("");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -64,6 +65,7 @@ export default function JobMatchingPage() {
         body: JSON.stringify({
           resume_id: selectedResume,
           job_description: jobDescription,
+          company_name: companyName,
         }),
       });
       if (!res.ok) {
@@ -107,6 +109,15 @@ export default function JobMatchingPage() {
           </select>
         </div>
         <div>
+          <label className="block mb-1 font-medium">Company Name</label>
+          <Input
+            className="w-full border rounded p-2"
+            value={companyName}
+            onChange={(e) => setCompanyName(e.target.value)}
+            required
+          />
+        </div>
+        <div>
           <label className="block mb-1 font-medium">
             Paste Job Description
           </label>
@@ -120,7 +131,9 @@ export default function JobMatchingPage() {
         </div>
         <Button
           type="submit"
-          disabled={loading || !selectedResume || !jobDescription}
+          disabled={
+            loading || !selectedResume || !jobDescription || !companyName
+          }
         >
           {loading ? "Matching..." : "Match Resume to Job"}
         </Button>

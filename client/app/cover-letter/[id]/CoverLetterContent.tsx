@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useUserStore } from "@/lib/useUserStore";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -19,8 +19,10 @@ interface CoverLetter {
   };
 }
 
-export default function CoverLetterContent({ id }: { id: string }) {
+export default function CoverLetterContent() {
   const router = useRouter();
+  const params = useParams();
+  const id = params.id;
   const { user } = useUserStore();
   const [coverLetter, setCoverLetter] = useState<CoverLetter | null>(null);
   const [loading, setLoading] = useState(true);

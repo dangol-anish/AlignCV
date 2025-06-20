@@ -11,10 +11,12 @@ export async function matchResumeToJob({
   userId,
   resumeId,
   jobDescription,
+  companyName,
 }: {
   userId: string;
   resumeId: string;
   jobDescription: string;
+  companyName: string;
 }): Promise<IJobMatchingResult> {
   // Fetch resume
   const { data: resume, error: resumeError } = await supabase
@@ -44,6 +46,7 @@ export async function matchResumeToJob({
     throw new Error("Failed to parse AI response: " + aiText);
   }
   // Store result
+  const { match_score, strengths, gaps, suggestions } = ai_analysis;
   const { data: result, error: storeError } = await supabase
     .from("job_matching_results")
     .insert([
@@ -51,7 +54,12 @@ export async function matchResumeToJob({
         user_id: userId,
         resume_id: resumeId,
         job_description: jobDescription,
+        company_name: companyName,
         ai_analysis,
+        match_score,
+        strengths,
+        gaps,
+        suggestions,
       },
     ])
     .select()

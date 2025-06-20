@@ -140,7 +140,7 @@ export default function ResumeAnalysisPage() {
 
           {/* Category Insights Section */}
           {categoryInsights && (
-            <div className="py-12">
+            <div className="py-10">
               <h2 className="text-3xl tracking-wide text-blue-500 mb-12 text-center">
                 <p className="mb-6">Category Insights</p>
                 <DividerSm />

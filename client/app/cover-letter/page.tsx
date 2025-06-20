@@ -164,31 +164,35 @@ export default function CoverLetterPage() {
               <label className="block text-xl mb-2 font-medium text-stone-200">
                 Select Resume
               </label>
-              {resumesLoading ? (
-                <div className="flex items-center justify-center p-4">
-                  <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
-                </div>
-              ) : (
-                <select
-                  value={selectedResumeId}
-                  onChange={(e) => setSelectedResumeId(e.target.value)}
-                  className="w-full p-4 py-2 rounded-md border border-stone-700 bg-stone-900/70 text-stone-100 placeholder:text-stone-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-4 transition-colors"
-                >
-                  <option value="">No resume selected</option>
-                  {resumes.map((resume) => (
-                    <option
-                      key={resume.id}
-                      value={resume.id}
-                      className="text-stone-100 bg-stone-900"
-                    >
-                      {resume.filename ||
-                        resume.name ||
-                        resume.original_filename ||
-                        `Resume ${resume.id}`}
-                    </option>
-                  ))}
-                </select>
-              )}
+              <select
+                value={selectedResumeId}
+                onChange={(e) => setSelectedResumeId(e.target.value)}
+                className="w-full p-4 py-2 rounded-md border border-stone-700 bg-stone-900/70 text-stone-100 placeholder:text-stone-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-4 transition-colors"
+                disabled={resumesLoading}
+                required
+              >
+                {resumesLoading ? (
+                  <option value="" disabled>
+                    Loading...
+                  </option>
+                ) : (
+                  <option value="" className="text-stone-400 bg-stone-900">
+                    -- Select a resume --
+                  </option>
+                )}
+                {resumes.map((resume) => (
+                  <option
+                    key={resume.id}
+                    value={resume.id}
+                    className="text-stone-100 bg-stone-900"
+                  >
+                    {resume.filename ||
+                      resume.name ||
+                      resume.original_filename ||
+                      `Resume ${resume.id}`}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block mb-2 text-xl font-medium text-stone-200">

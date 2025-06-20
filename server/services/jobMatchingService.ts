@@ -35,6 +35,7 @@ export async function matchResumeToJob({
   // Call Gemini
   const aiText = await generateContentWithRetry(prompt);
   let ai_analysis;
+  let job_title;
   try {
     ai_analysis = JSON.parse(
       aiText
@@ -42,6 +43,7 @@ export async function matchResumeToJob({
         .replace(/```/g, "")
         .trim()
     );
+    job_title = ai_analysis.job_title;
   } catch (e) {
     throw new Error("Failed to parse AI response: " + aiText);
   }
@@ -55,6 +57,7 @@ export async function matchResumeToJob({
         resume_id: resumeId,
         job_description: jobDescription,
         company_name: companyName,
+        job_title: job_title,
         ai_analysis,
         match_score,
         strengths,

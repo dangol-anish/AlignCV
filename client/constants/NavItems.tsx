@@ -8,7 +8,7 @@ export const navItems = [
   },
   {
     label: "Job Match",
-    path: "/job-matching",
+    path: "/job-match",
     icon: Briefcase,
   },
   {

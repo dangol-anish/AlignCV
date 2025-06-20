@@ -424,7 +424,9 @@ export default function Dashboard() {
                     >
                       <div>
                         <span className="text-stone-100 font-medium">
-                          {match.job_title} at {match.company_name}
+                          {match.job_title ||
+                            match.company_name ||
+                            "Job Title Not Available"}
                         </span>
                         {match.created_at && (
                           <span className="ml-2 text-xs text-stone-400">

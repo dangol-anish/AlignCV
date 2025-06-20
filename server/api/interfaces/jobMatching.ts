@@ -5,11 +5,13 @@ export interface IJobMatchingResult {
   job_description: string;
   company_name?: string;
   ai_analysis: {
+    job_title?: string;
     match_score: number;
     strengths: string[];
     gaps: string[];
     suggestions: string[];
   };
+  job_title?: string;
   match_score?: number;
   strengths?: string[];
   gaps?: string[];

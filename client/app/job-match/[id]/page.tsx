@@ -210,7 +210,7 @@ export default function JobMatchPage() {
           <Button
             variant="outline"
             className="cursor-pointer flex-1 bg-gradient-to-r from-stone-800/50 to-stone-900/50 hover:from-stone-800 hover:to-stone-900 text-stone-100 border border-stone-700 transition-all duration-200"
-            onClick={() => router.push("/job-matching")}
+            onClick={() => router.push("/job-match")}
           >
             Match Another Job
           </Button>

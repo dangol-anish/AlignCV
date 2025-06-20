@@ -41,6 +41,10 @@ export default function Dashboard() {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadLoading, setUploadLoading] = useState(false);
   const uploadInputRef = useRef<HTMLInputElement>(null);
+  const dropdownTriggerRef = useRef<HTMLButtonElement>(null);
+  const [dropdownWidth, setDropdownWidth] = useState<number | undefined>(
+    undefined
+  );
 
   // Scroll to top on mount to prevent browser restoring scroll position to bottom
   useEffect(() => {
@@ -130,6 +134,12 @@ export default function Dashboard() {
     }
   }, [loading]);
 
+  useEffect(() => {
+    if (dropdownTriggerRef.current) {
+      setDropdownWidth(dropdownTriggerRef.current.offsetWidth);
+    }
+  }, []);
+
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
@@ -215,6 +225,15 @@ export default function Dashboard() {
     setCoverLetters([]);
   };
 
+  // Helper to truncate resume name after 10 words
+  function truncateResumeName(name: string) {
+    const words = name.split(" ");
+    if (words.length > 10) {
+      return words.slice(0, 10).join(" ") + "...";
+    }
+    return name;
+  }
+
   if (authLoading || (loading && !userResumes.length)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-stone-950">
@@ -256,7 +275,7 @@ export default function Dashboard() {
   const allImprovements = analyses[0]?.analyses || [];
 
   return (
-    <div className="min-h-screen bg-stone-950 flex flex-col items-center ">
+    <div className=" bg-stone-950 flex flex-col items-center ">
       <div className="w-full flex flex-col gap-10">
         <div className="flex flex-col gap-5">
           {" "}
@@ -308,41 +327,201 @@ export default function Dashboard() {
         </div>
 
         <DividerSm />
-        <div className="flex flex-col gap-5">
+        <div className="flex justify-between   gap-5">
           <h2 className="text-blue-500 text-2xl font-semibold">View Resumes</h2>
-          <DropdownMenu modal={false}>
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="default"
-                className="text-stone-100 hover:text-blue-500 focus:ring-0 focus:outline-none w-full"
+                className=" text-white w-52 flex gap-8 truncate max-w-full justify-between"
               >
-                Choose a resume <ChevronDownIcon className="ml-2 w-4 h-4" />
+                <span className="truncate overflow-hidden whitespace-nowrap max-w-[20ch] font-light">
+                  {selectedResumeId
+                    ? truncateResumeName(
+                        userResumes.find((r) => r.id === selectedResumeId)
+                          ?.original_filename || ""
+                      )
+                    : "Select a Resume"}
+                </span>
+                <ChevronDownIcon className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent
-              className="w-full  bg-stone-950 border border-stone-700 shadow-lg"
-              align="end"
-              modal={false}
-            >
-              <DropdownMenuLabel className="text-stone-400 px-4 py-2">
-                My Account
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-stone-700" />
-              <DropdownMenuItem className="hover:bg-blue-500 hover:text-white transition-colors duration-150 px-4 py-2">
-                Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-blue-500 hover:text-white transition-colors duration-150 px-4 py-2">
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-blue-500 hover:text-white transition-colors duration-150 px-4 py-2">
-                Team
-              </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-blue-500 hover:text-white transition-colors duration-150 px-4 py-2">
-                Subscription
-              </DropdownMenuItem>
+            <DropdownMenuContent className="w-52 mt-1 bg-stone-800 text-stone-100 border-0">
+              <DropdownMenuLabel>Your Resumes</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {userResumes.map((resume) => (
+                <DropdownMenuItem
+                  className="truncate overflow-hidden whitespace-nowrap max-w-[24ch]"
+                  key={resume.id}
+                  onSelect={() => handleSelectResume(resume.id)}
+                >
+                  {truncateResumeName(resume.original_filename)}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+
+        {/* Uploaded Resumes Section */}
+
+        <Card className="bg-stone-950 border-stone-800 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent font-bold">
+              Your Uploaded Resumes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {userResumes.length === 0 ? (
+              <div className="text-center text-stone-400 py-8">
+                No resumes found. Upload a resume to get started.
+              </div>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between">
+                    <span className="truncate overflow-hidden whitespace-nowrap max-w-[10ch]">
+                      {selectedResumeId
+                        ? truncateResumeName(
+                            userResumes.find((r) => r.id === selectedResumeId)
+                              ?.original_filename || ""
+                          )
+                        : "Select a Resume"}
+                    </span>
+                    <ChevronDownIcon className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-full">
+                  <DropdownMenuLabel>Your Resumes</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {userResumes.map((resume) => (
+                    <DropdownMenuItem
+                      className="truncate overflow-hidden whitespace-nowrap max-w-[24ch]"
+                      key={resume.id}
+                      onSelect={() => handleSelectResume(resume.id)}
+                    >
+                      {truncateResumeName(resume.original_filename)}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </CardContent>
+        </Card>
+
+        {loading && selectedResumeId && (
+          <div className="text-center text-stone-400 py-8">Loading data...</div>
+        )}
+
+        {selectedResumeId && !loading && (
+          <>
+            <Card className="bg-stone-950 border-stone-800 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-2xl bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent font-bold">
+                  Resume Improvements
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {allImprovements.length === 0 ? (
+                  <div className="text-center text-stone-400 py-8">
+                    No improvements found for this resume.
+                  </div>
+                ) : (
+                  <ScrollArea className="h-[300px] w-full">
+                    <div className="space-y-4">
+                      {allImprovements.map(
+                        (improvement: any, index: number) => (
+                          <div key={index} className="space-y-2">
+                            <Card className="bg-stone-900 border-stone-800 ">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h3 className="font-semibold text-stone-100">
+                                    {improvement.section}
+                                  </h3>
+                                  <p className="text-sm text-stone-400">
+                                    {improvement.suggestion}
+                                  </p>
+                                </div>
+                                <Badge
+                                  variant="outline"
+                                  className="border-purple-500 text-purple-500"
+                                >
+                                  Improvement
+                                </Badge>
+                              </div>
+                            </Card>
+                            <Separator className="bg-stone-800" />
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </ScrollArea>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-stone-950 border-stone-800 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-2xl bg-gradient-to-r from-green-500 to-green-600 bg-clip-text text-transparent font-bold">
+                  Job Matches
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {jobMatches.length === 0 ? (
+                  <div className="text-center text-stone-400 py-8">
+                    No job matches found for this resume.
+                  </div>
+                ) : (
+                  <ScrollArea className="h-[300px] w-full">
+                    <div className="space-y-4">
+                      {jobMatches.map((match) => (
+                        <div key={match.id} className="space-y-2">
+                          <Card
+                            onClick={() =>
+                              router.push(`/job-match/${match.id}`)
+                            }
+                            className="bg-stone-900 border-stone-800  cursor-pointer hover:bg-stone-800/80 transition-colors"
+                          >
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h3 className="font-semibold text-stone-100">
+                                  {match.job_title} at {match.company_name}
+                                </h3>
+                                <p className="text-sm text-stone-400">
+                                  {match.job_location}
+                                </p>
+                              </div>
+                              <Badge
+                                variant="outline"
+                                className="border-green-500 text-green-500"
+                              >
+                                Match: {match.match_score}%
+                              </Badge>
+                            </div>
+                          </Card>
+                          <Separator className="bg-stone-800" />
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-stone-950 border-stone-800 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-2xl bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent font-bold">
+                  Cover Letters
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CoverLetterList
+                  coverLetters={coverLetters}
+                  onDelete={handleDeleteCoverLetter}
+                />
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
     </div>
   );

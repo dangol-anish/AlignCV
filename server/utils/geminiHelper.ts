@@ -11,20 +11,12 @@ export async function generateContentWithRetry(
   maxRetries = 5
 ): Promise<string> {
   const model = getModel();
-  console.log(
-    "Starting AI generation with prompt:",
-    prompt.substring(0, 200) + "..."
-  );
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`Attempt ${attempt} of ${maxRetries}...`);
       const result = await model.generateContent(prompt);
       const text = await result.response.text();
-      console.log(
-        "Successfully generated content:",
-        text.substring(0, 200) + "..."
-      );
+
       return text;
     } catch (error: any) {
       // Enhanced error logging

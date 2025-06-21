@@ -29,7 +29,6 @@ export default function JobMatchPage({ params }: { params: { id: string } }) {
 
     const fetchMatch = async () => {
       try {
-        console.log("[Job Match Page] Fetching match for ID:", params.id);
         const response = await fetch(`/api/job-matching/${params.id}`, {
           headers: {
             Authorization: `Bearer ${user.token}`,
@@ -46,7 +45,7 @@ export default function JobMatchPage({ params }: { params: { id: string } }) {
         }
 
         const data = await response.json();
-        console.log("[Job Match Page] Received data:", data);
+
         setMatch(data.match);
       } catch (err: any) {
         console.error("[Job Match Page] Error:", {

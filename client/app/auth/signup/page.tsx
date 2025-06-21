@@ -28,20 +28,20 @@ export default function SignUpPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    console.log("[SIGNUP] Sending:", { name, email, password });
+
     const res = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, password }),
     });
-    console.log("[SIGNUP] Response status:", res.status);
+
     let data = null;
     try {
       data = await res.json();
     } catch (e) {
       data = null;
     }
-    console.log("[SIGNUP] Response data:", data);
+
     if (res.ok) {
       toast.success("Sign up successful! You can now sign in.");
       // Close sidebar after sign up

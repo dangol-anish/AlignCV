@@ -31,7 +31,6 @@ export default function ClientRoot({
             created_at: session.user.created_at,
             token: session.access_token,
           });
-          console.log("[CLIENTROOT] User set in store:", session.user);
         } else {
           // Try to refresh session if missing
           const { data: refreshed, error } =
@@ -44,13 +43,8 @@ export default function ClientRoot({
               created_at: refreshed.session.user.created_at,
               token: refreshed.session.access_token,
             });
-            console.log(
-              "[CLIENTROOT] User set from refreshSession:",
-              refreshed.session.user
-            );
           } else {
             clearUser();
-            console.log("[CLIENTROOT] User cleared from store (no session)");
           }
         }
       } catch (error) {
@@ -74,13 +68,8 @@ export default function ClientRoot({
             created_at: session.user.created_at,
             token: session.access_token,
           });
-          console.log(
-            "[CLIENTROOT] User updated from onAuthStateChange:",
-            session.user
-          );
         } else {
           clearUser();
-          console.log("[CLIENTROOT] User cleared from onAuthStateChange");
         }
       }
     );

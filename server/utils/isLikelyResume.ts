@@ -27,12 +27,6 @@ export function isLikelyResume(text: string): boolean {
   // Optional: check for date ranges like "2015-2023"
   const hasDateRange = /\b(19|20)\d{2}[-–—](19|20)\d{2}\b/.test(text);
 
-  // Debug logs (remove or comment out in production)
-  console.log("Resume validator - matched sections:", matches);
-  console.log("Resume validator - hasEmail:", hasEmail);
-  console.log("Resume validator - hasPhone:", hasPhone);
-  console.log("Resume validator - hasDateRange:", hasDateRange);
-
   // Require at least 3 section headers and some contact or date info to qualify as resume
   return matches >= 3 && (hasEmail || hasPhone || hasDateRange);
 }

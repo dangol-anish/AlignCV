@@ -42,10 +42,6 @@ export default function CoverLetterContent() {
     }
 
     const fetchCoverLetter = async () => {
-      console.log("\n=== FETCHING COVER LETTER ===");
-      console.log("Cover letter ID:", id);
-      console.log("User token:", user?.token);
-
       setLoading(true);
       setError(null);
 
@@ -55,23 +51,20 @@ export default function CoverLetterContent() {
             Authorization: `Bearer ${user.token}`,
           },
         });
-        console.log("Response status:", response.status);
+
         const data = await response.json();
-        console.log("Response data:", data);
 
         if (!response.ok) {
-          console.log("Error response:", data);
           throw new Error(data.message || "Failed to fetch cover letter");
         }
 
         if (!data.success || !data.coverLetter) {
-          console.log("Invalid response format:", data);
           throw new Error("Invalid response format from server");
         }
 
         // Extract the actual cover letter data from the response
         const coverLetterData = data.coverLetter.data || data.coverLetter;
-        console.log("Setting cover letter:", coverLetterData);
+
         setCoverLetter(coverLetterData);
       } catch (err: any) {
         console.error("Error fetching cover letter:", err);
@@ -128,8 +121,6 @@ export default function CoverLetterContent() {
     );
   }
 
-  console.log("Rendering cover letter:", coverLetter);
-
   const handleDownload = async (type: "pdf" | "docx") => {
     setDownloading(type);
     try {
@@ -157,7 +148,6 @@ export default function CoverLetterContent() {
           a.remove();
         }, 3000);
       }, 100);
-      console.log(`Download for ${type} triggered.`);
     } catch (err) {
       alert(`Unexpected error: ${err}`);
       console.error("Unexpected download error:", err);

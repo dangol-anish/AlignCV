@@ -45,14 +45,14 @@ export async function googleOAuthCallback(req: Request, res: Response) {
 
 export async function signUp(req: Request, res: Response, next: NextFunction) {
   const { name, email, password } = req.body;
-  console.log("[SIGNUP] Request body:", req.body);
+
   try {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { full_name: name } },
     });
-    console.log("[SIGNUP] Supabase response:", { data, error });
+
     if (error) {
       // Check for already registered error
       if (
@@ -60,37 +60,34 @@ export async function signUp(req: Request, res: Response, next: NextFunction) {
         error.message?.toLowerCase().includes("already registered") ||
         error.status === 400
       ) {
-        console.log("[SIGNUP] Already registered error for:", email);
         return res.status(409).json({
           message:
             "This email is already registered. Please sign in with Google.",
         });
       }
-      console.log("[SIGNUP] Other error:", error);
+
       return res.status(400).json({ message: error.message });
     }
-    console.log("[SIGNUP] Success:", data);
+
     // Success: return user and session
     return res.status(201).json({ user: data.user, session: data.session });
   } catch (err) {
-    console.log("[SIGNUP] Exception:", err);
     next(err);
   }
 }
 
 export async function signIn(req: Request, res: Response, next: NextFunction) {
   const { email, password } = req.body;
-  console.log("[SIGNIN] Request body:", req.body);
+
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    console.log("[SIGNIN] Supabase response:", { data, error });
+
     if (error) return res.status(400).json({ message: error.message });
     return res.status(200).json({ user: data.user, session: data.session });
   } catch (err) {
-    console.log("[SIGNIN] Exception:", err);
     next(err);
   }
 }

@@ -51,7 +51,6 @@ export default function Dashboard() {
 
   // Scroll to top on mount to prevent browser restoring scroll position to bottom
   useEffect(() => {
-    console.log("On mount, scrollY:", window.scrollY);
     window.scrollTo(0, 0);
   }, []);
 
@@ -133,7 +132,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!loading) {
-      console.log("After loading, scrollY:", window.scrollY);
     }
   }, [loading]);
 
@@ -335,9 +333,6 @@ export default function Dashboard() {
 
   // Flatten all improvements from all analyses
   const allImprovements = analyses[0]?.analyses || [];
-
-  console.log("analyses:", analyses);
-  console.log("allImprovements:", allImprovements);
 
   return (
     <div className=" bg-stone-950 flex flex-col items-center ">

@@ -49,15 +49,7 @@ export default function ResumeTemplatesPage() {
   ];
 
   // Temporary debugging
-  useEffect(() => {
-    console.log("=== TEMPLATES PAGE DEBUG ===");
-    console.log("parsedData:", parsedData);
-    console.log("resumeImprovements:", resumeImprovements);
-    console.log("parsedData type:", typeof parsedData);
-    console.log("parsedData is null:", parsedData === null);
-    console.log("parsedData is undefined:", parsedData === undefined);
-    console.log("Store state:", useResumeAnalysisStore.getState());
-  }, [parsedData, resumeImprovements]);
+  useEffect(() => {}, [parsedData, resumeImprovements]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -66,13 +58,7 @@ export default function ResumeTemplatesPage() {
   }, [authLoading, user, router]);
 
   // Debug logging for download state
-  useEffect(() => {
-    console.log("Download state changed:", {
-      downloading,
-      transformedData: !!transformedData,
-      previewHtml: !!previewHtml,
-    });
-  }, [downloading, transformedData, previewHtml]);
+  useEffect(() => {}, [downloading, transformedData, previewHtml]);
 
   if (authLoading)
     return (
@@ -110,7 +96,6 @@ export default function ResumeTemplatesPage() {
             <Button
               onClick={() => {
                 useResumeAnalysisStore.getState().clearResults();
-                console.log("Store cleared");
               }}
               variant="outline"
               className="w-full border-stone-700 text-stone-400 hover:text-stone-100 hover:bg-stone-800"
@@ -264,13 +249,7 @@ export default function ResumeTemplatesPage() {
 
   // Transform data for modern template format
   function transformDataForTemplate(parsed: any, template: string) {
-    console.log("=== TRANSFORM DEBUG ===");
-    console.log("Original parsed data:", parsed);
-    console.log("Template:", template);
-    console.log("Resume improvements:", resumeImprovements);
-
     const improvedData = applyImprovementsDeep(parsed, resumeImprovements);
-    console.log("Improved data:", improvedData);
 
     if (template === "modern" || template === "minimal") {
       // Modern and minimal templates expect the same data structure
@@ -281,8 +260,6 @@ export default function ResumeTemplatesPage() {
       const phone = improvedData.phone || "";
       const location = improvedData.location || "";
 
-      console.log("Contact info:", { name, email, phone, location });
-
       // Transform experience data - try multiple possible field names
       const experienceData =
         improvedData.experience ||
@@ -291,7 +268,6 @@ export default function ResumeTemplatesPage() {
         improvedData.Work ||
         improvedData.employment ||
         improvedData.Employment;
-      console.log("Experience data found:", experienceData);
 
       const work = toArrayOfObjects(experienceData, [
         "title",
@@ -307,15 +283,12 @@ export default function ResumeTemplatesPage() {
           bullets: item.description ? [cleanBulletPoint(item.description)] : [],
         }));
 
-      console.log("Transformed work:", work);
-
       // Transform education data - try multiple possible field names
       const educationData =
         improvedData.education ||
         improvedData.Education ||
         improvedData.academic ||
         improvedData.Academic;
-      console.log("Education data found:", educationData);
 
       const education = toArrayOfObjects(educationData, [
         "degree",
@@ -331,15 +304,12 @@ export default function ResumeTemplatesPage() {
           details: item.details || item.description || "",
         }));
 
-      console.log("Transformed education:", education);
-
       // Transform skills data - handle categorized skills
       const skillsData =
         improvedData.skills ||
         improvedData.Skills ||
         improvedData.technical_skills ||
         improvedData.Technical_Skills;
-      console.log("Skills data found:", skillsData);
 
       // Handle both old array format and new categorized format
       let skills = [];
@@ -372,12 +342,8 @@ export default function ResumeTemplatesPage() {
           );
       }
 
-      console.log("Transformed skills:", skills);
-      console.log("Skills for download:", skillsForDownload);
-
       // Transform projects data - convert descriptions to bullet points
       const projectsData = improvedData.projects || improvedData.Projects;
-      console.log("Projects data found:", projectsData);
 
       const projects = toArrayOfObjects(projectsData, [
         "title",
@@ -399,8 +365,6 @@ export default function ResumeTemplatesPage() {
           };
         });
 
-      console.log("Transformed projects:", projects);
-
       const result = {
         name,
         email,
@@ -413,7 +377,6 @@ export default function ResumeTemplatesPage() {
         skillsForDownload, // Flat array for downloads
       };
 
-      console.log("Final transformed result:", result);
       return result;
     } else {
       // For any other templates, use the sections format
@@ -506,11 +469,6 @@ export default function ResumeTemplatesPage() {
     }
 
     try {
-      console.log("=== TEMPLATE SELECTION DEBUG ===");
-      console.log("Template:", template);
-      console.log("Parsed data:", parsedData);
-      console.log("Improvements:", resumeImprovements);
-
       // First, extract structured data using AI
       const extractRes = await fetch("/api/upload/extract-template-data", {
         method: "POST",
@@ -530,14 +488,12 @@ export default function ResumeTemplatesPage() {
       }
 
       const extractData = await extractRes.json();
-      console.log("AI extracted data:", extractData.data);
 
       // Transform the AI-extracted data for the specific template
       const transformedData = transformDataForTemplate(
         extractData.data,
         template
       );
-      console.log("[handleSelect] Transformed data:", transformedData);
 
       // Store the transformed data for downloads
       setTransformedData(transformedData);
@@ -552,16 +508,11 @@ export default function ResumeTemplatesPage() {
         let msg = "Failed to generate resume";
         try {
           const errJson = await res.json();
-          console.log("[handleSelect] Backend error response:", errJson);
+
           msg = errJson.error || msg;
           if (errJson.details) msg += `: ${errJson.details}`;
           if (errJson.stack) msg += `\nStack: ${errJson.stack}`;
-        } catch (e) {
-          console.log(
-            "[handleSelect] Error parsing backend error response:",
-            e
-          );
-        }
+        } catch (e) {}
         throw new Error(msg);
       }
 
@@ -569,7 +520,6 @@ export default function ResumeTemplatesPage() {
       setPreviewHtml(html);
     } catch (e: any) {
       setError(e.message || "Unknown error");
-      console.log("[handleSelect] Error:", e);
     } finally {
       setLoading(false);
     }
@@ -577,7 +527,6 @@ export default function ResumeTemplatesPage() {
 
   // Simple test download function
   const testDownload = () => {
-    console.log("Test download called");
     const testContent = "This is a test download";
     const blob = new Blob([testContent], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -586,12 +535,10 @@ export default function ResumeTemplatesPage() {
     a.download = "test.txt";
     a.click();
     URL.revokeObjectURL(url);
-    console.log("Test download completed");
   };
 
   // Manual reset function for debugging
   const resetDownloadState = () => {
-    console.log("Manually resetting download state");
     setDownloading(false);
   };
 
@@ -705,7 +652,6 @@ export default function ResumeTemplatesPage() {
 
   // Helper function to format skills for text output
   const formatSkillsForText = (skills: any): string => {
-    console.log("Formatting skills:", skills);
     if (!skills) return "";
 
     if (Array.isArray(skills)) {
@@ -720,7 +666,7 @@ export default function ResumeTemplatesPage() {
           allSkills.push(...skillList);
         }
       });
-      console.log("Formatted skills:", allSkills.join(", "));
+
       return allSkills.join(", ");
     }
 

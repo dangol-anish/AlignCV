@@ -4,11 +4,9 @@ export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  console.log("[Client API] Fetching job match for ID:", params.id);
   try {
     const authHeader = request.headers.get("authorization");
     if (!authHeader) {
-      console.log("[Client API] No authorization header found");
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 }
@@ -24,10 +22,6 @@ export async function GET(
       );
     }
 
-    console.log(
-      "[Client API] Making request to:",
-      `${apiUrl}/api/job-matching/${params.id}`
-    );
     const response = await fetch(`${apiUrl}/api/job-matching/${params.id}`, {
       headers: {
         Authorization: authHeader,
@@ -35,10 +29,6 @@ export async function GET(
     });
 
     const data = await response.json();
-    console.log("[Client API] Server response:", {
-      status: response.status,
-      data,
-    });
 
     if (!response.ok) {
       console.error("[Client API] Server error response:", {

@@ -73,20 +73,14 @@ export async function getJobMatchesForUser(req: Request, res: Response) {
 }
 
 export async function getJobMatchById(req: Request, res: Response) {
-  console.log("[Server] Getting job match by ID:", req.params.id);
   const userId = (req as any).user?.id;
   const { id } = req.params;
 
   if (!userId) {
-    console.log("[Server] No user ID found in request");
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
 
   try {
-    console.log("[Server] Querying job_matching_results table for:", {
-      id,
-      userId,
-    });
     const { data: match, error } = await supabase
       .from("job_matching_results")
       .select("*")
@@ -105,7 +99,6 @@ export async function getJobMatchById(req: Request, res: Response) {
       throw error;
     }
 
-    console.log("[Server] Found job match:", match);
     return res.json({
       success: true,
       match,

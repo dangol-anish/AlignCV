@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-  console.log("[API ROUTE] /api/analyze HIT");
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   if (!apiUrl) {
     return NextResponse.json(

@@ -7,7 +7,6 @@ import { extractTextFromBuffer } from "../../services/textExtractor";
 import { cleanExtractedText } from "../../services/textCleaner";
 
 export async function analyzeResumeById(req: Request, res: Response) {
-  console.log("Backend: analyzeResumeById called with request body:", req.body);
   const userId = (req as any).user?.id;
   const { resume_id } = req.body;
   const file = (req as any).file;
@@ -26,21 +25,14 @@ export async function analyzeResumeById(req: Request, res: Response) {
       }
 
       // Parse and analyze
-      console.log("Step 1: Parsing resume with Gemini");
       const parsedData = await parseResumeWithGemini(cleanedText);
-      console.log("Resume parsing completed");
 
-      console.log("Step 2: Scoring resume with ATS");
       const atsScoreResult = await scoreResumeATS(cleanedText);
-      console.log("ATS scoring completed");
 
-      console.log("Step 3: Analyzing resume categories");
       const analysis = await analyzeResume(cleanedText);
-      console.log("Category analysis completed");
 
       // Store the resume and analysis if user is authenticated
       if (userId) {
-        console.log("Step 4: Storing resume and analysis");
         const { data: resume, error: resumeError } = await supabase
           .from("resumes")
           .insert([
@@ -88,7 +80,6 @@ export async function analyzeResumeById(req: Request, res: Response) {
         }
       }
 
-      console.log("Analysis completed successfully");
       return res.json({
         success: true,
         parsed: parsedData,
@@ -169,22 +160,15 @@ export async function analyzeResumeById(req: Request, res: Response) {
 
   try {
     // Parse and analyze
-    console.log("Starting resume analysis for ID:", resume_id);
 
-    console.log("Step 1: Parsing resume with Gemini");
     const parsedData = await parseResumeWithGemini(resume.raw_text);
-    console.log("Resume parsing completed");
 
-    console.log("Step 2: Scoring resume with ATS");
     const atsScoreResult = await scoreResumeATS(resume.raw_text);
-    console.log("ATS scoring completed");
 
-    console.log("Step 3: Analyzing resume categories");
     const analysis = await analyzeResume(resume.raw_text);
-    console.log("Category analysis completed");
 
     // Store analysis
-    console.log("Step 4: Storing analysis results");
+
     const { data: analysisRow, error: analysisError } = await supabase
       .from("resume_analysis")
       .insert([
@@ -207,7 +191,7 @@ export async function analyzeResumeById(req: Request, res: Response) {
     }
 
     // Update the resume with parsed data
-    console.log("Step 5: Updating resume with parsed data");
+
     const { error: updateError } = await supabase
       .from("resumes")
       .update({ parsed_data: parsedData })
@@ -218,7 +202,6 @@ export async function analyzeResumeById(req: Request, res: Response) {
       // Don't fail the request, just log the error
     }
 
-    console.log("Analysis completed successfully");
     return res.json({
       success: true,
       parsed: parsedData,

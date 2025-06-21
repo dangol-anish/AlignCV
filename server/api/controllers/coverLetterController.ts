@@ -17,13 +17,6 @@ export async function generateCoverLetter(req: Request, res: Response) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
 
-  console.log("Received cover letter request:", {
-    userId,
-    resume_id,
-    hasJobDescription: !!job_description,
-    answerKeys: Object.keys(answers || {}),
-  });
-
   try {
     const result = await generateCoverLetterService({
       userId,
@@ -70,22 +63,14 @@ export async function getCoverLetterById(req: Request, res: Response) {
   const userId = (req as any).user?.id;
   const { id } = req.params;
 
-  console.log("\n=== GET COVER LETTER BY ID ===");
-  console.log("Request params:", { userId, id });
-  console.log("Auth header:", req.headers.authorization);
-  console.log("User object:", (req as any).user);
-
   if (!userId) {
-    console.log("No user ID found in request");
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
 
   try {
     const coverLetter = await getCoverLetterByIdService(id, userId);
-    console.log("Retrieved cover letter:", coverLetter);
 
     if (!coverLetter) {
-      console.log("No cover letter found");
       return res.status(404).json({
         success: false,
         message: "Cover letter not found",
@@ -100,7 +85,7 @@ export async function getCoverLetterById(req: Request, res: Response) {
     };
 
     const response = { success: true, coverLetter: formattedCoverLetter };
-    console.log("Sending response:", response);
+
     return res.json(response);
   } catch (err: any) {
     console.error("Error fetching cover letter:", err);
@@ -115,15 +100,13 @@ export async function getCoverLetterById(req: Request, res: Response) {
 export async function downloadCoverLetterPdf(req: Request, res: Response) {
   const userId = (req as any).user?.id;
   const { id } = req.params;
-  console.log("[PDF] Download request received", { userId, id });
+
   if (!userId) {
-    console.log("[PDF] Unauthorized request");
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
   try {
     const coverLetter = await getCoverLetterByIdService(id, userId);
     if (!coverLetter || !coverLetter.data) {
-      console.log("[PDF] Cover letter not found", { id, userId });
       return res
         .status(404)
         .json({ success: false, message: "Cover letter not found" });
@@ -165,9 +148,8 @@ export async function downloadCoverLetterPdf(req: Request, res: Response) {
       "Content-Disposition",
       `attachment; filename=cover-letter-${id}.pdf`
     );
-    console.log("[PDF] Sending PDF response", { size: pdfBuffer.length });
+
     res.send(pdfBuffer);
-    console.log("[PDF] Response sent successfully");
   } catch (err: any) {
     console.error("[PDF] Error generating PDF:", err);
     res.status(500).json({
@@ -180,15 +162,13 @@ export async function downloadCoverLetterPdf(req: Request, res: Response) {
 export async function downloadCoverLetterDocx(req: Request, res: Response) {
   const userId = (req as any).user?.id;
   const { id } = req.params;
-  console.log("[DOCX] Download request received", { userId, id });
+
   if (!userId) {
-    console.log("[DOCX] Unauthorized request");
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
   try {
     const coverLetter = await getCoverLetterByIdService(id, userId);
     if (!coverLetter || !coverLetter.data) {
-      console.log("[DOCX] Cover letter not found", { id, userId });
       return res
         .status(404)
         .json({ success: false, message: "Cover letter not found" });
@@ -206,9 +186,7 @@ export async function downloadCoverLetterDocx(req: Request, res: Response) {
       "Content-Disposition",
       `attachment; filename=cover-letter-${id}.docx`
     );
-    console.log("[DOCX] Sending DOCX response", { size: docxBuffer.length });
     res.send(docxBuffer);
-    console.log("[DOCX] Response sent successfully");
   } catch (err: any) {
     console.error("[DOCX] Error generating DOCX:", err);
     res.status(500).json({

@@ -23,11 +23,6 @@ export default function SignInPage() {
   const setUser = useUserStore((state) => state.setUser);
   const toastShownRef = useRef(false);
 
-  // Log the zustand user state on every render
-  useEffect(() => {
-    console.log("[SIGNIN PAGE] zustand user:", user);
-  }, [user]);
-
   // Redirect signed-in users to /dashboard
   useEffect(() => {
     if (user) {
@@ -65,13 +60,7 @@ export default function SignInPage() {
         created_at: data.user.created_at,
         token: data.session.access_token,
       });
-      console.log("[SIGNIN PAGE] setUser called with:", {
-        id: data.user.id,
-        email: data.user.email || "",
-        user_metadata: data.user.user_metadata,
-        created_at: data.user.created_at,
-        token: data.session.access_token,
-      });
+
       // Close sidebar after sign in
       if (typeof window !== "undefined") {
         const sidebarStore = require("@/lib/useSidebarStore");

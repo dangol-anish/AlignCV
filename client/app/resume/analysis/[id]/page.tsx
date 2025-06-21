@@ -47,9 +47,6 @@ export default function ResumeAnalysisPage() {
         const data = await response.json();
         setAnalysis(data.analysis);
 
-        console.log("=== INDIVIDUAL ANALYSIS DEBUG ===");
-        console.log("Analysis data:", data.analysis);
-
         // We need to fetch the resume to get the parsed_data
         const resumeResponse = await fetch(`/api/resumes/${params.id}`, {
           headers: {
@@ -60,13 +57,11 @@ export default function ResumeAnalysisPage() {
         let parsedData = null;
         if (resumeResponse.ok) {
           const resumeData = await resumeResponse.json();
-          console.log("Resume data:", resumeData);
+
           parsedData = resumeData.resume.parsed_data;
-          console.log("Parsed data from resume:", parsedData);
 
           // If parsed_data is missing, try to re-analyze the resume
           if (!parsedData) {
-            console.log("No parsed_data found, attempting to re-analyze...");
             try {
               const reAnalyzeResponse = await fetch("/api/analyze", {
                 method: "POST",
@@ -80,7 +75,6 @@ export default function ResumeAnalysisPage() {
               if (reAnalyzeResponse.ok) {
                 const reAnalyzeData = await reAnalyzeResponse.json();
                 parsedData = reAnalyzeData.parsed;
-                console.log("Re-analyzed parsed data:", parsedData);
               }
             } catch (reAnalyzeError) {
               console.error("Failed to re-analyze:", reAnalyzeError);
@@ -98,13 +92,11 @@ export default function ResumeAnalysisPage() {
           resumeImprovements: data.analysis.line_improvements || [],
         };
 
-        console.log("Setting store with:", storeData);
         setResults(storeData);
 
         // Verify store was set
         setTimeout(() => {
           const storeState = useResumeAnalysisStore.getState();
-          console.log("Store state after setting:", storeState);
         }, 100);
       } catch (err: any) {
         setError(err.message);

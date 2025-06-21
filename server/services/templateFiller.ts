@@ -15,7 +15,7 @@ export async function fillResumeTemplate(
   let templatePath, templateContent, template;
   try {
     templatePath = path.join(templatesDir, `${templateName}.html`);
-    console.log("[fillResumeTemplate] templatePath:", templatePath);
+
     templateContent = await fs.readFile(templatePath, "utf-8");
   } catch (err: any) {
     console.error("[fillResumeTemplate] Error reading template file:", err);
@@ -32,10 +32,6 @@ export async function fillResumeTemplate(
     );
   }
   try {
-    console.log(
-      "[fillResumeTemplate] Data passed to template:",
-      JSON.stringify(data, null, 2)
-    );
     return template(data);
   } catch (err: any) {
     console.error("[fillResumeTemplate] Error filling template:", err);

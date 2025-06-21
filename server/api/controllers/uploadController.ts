@@ -16,10 +16,6 @@ export async function handleFileUpload(req: MulterRequest, res: Response) {
   const cleanedText = req.cleanedText!;
 
   // Add detailed logging
-  console.log("[UPLOAD] handleFileUpload called");
-  console.log("[UPLOAD] User ID:", req.user?.id);
-  console.log("[UPLOAD] File info:", { originalname, mimetype, size });
-  console.log("[UPLOAD] Cleaned text length:", cleanedText?.length);
 
   // Only validate and store the resume, no analysis or parsing
   try {
@@ -41,7 +37,7 @@ export async function handleFileUpload(req: MulterRequest, res: Response) {
       console.error("[UPLOAD] Supabase DB error:", resumeError);
       throw resumeError;
     }
-    console.log("[UPLOAD] Resume inserted:", resume);
+
     return res.json({ success: true, resume });
   } catch (dbError: any) {
     console.error("[UPLOAD] Exception:", dbError);
@@ -92,18 +88,13 @@ export async function saveResumeEdit(req: MulterRequest, res: Response) {
 export async function generateResume(req: Request, res: Response) {
   try {
     const { template, data } = req.body;
-    console.log("generateResume called with:", { template, data });
+
     if (!template || !data) {
       return res.status(400).json({ error: "Missing template or data" });
     }
     let html;
     try {
-      console.log(
-        "[generateResume] Data to fillResumeTemplate:",
-        JSON.stringify(data, null, 2)
-      );
       html = await fillResumeTemplate(template, data);
-      console.log("[generateResume] Successfully filled template");
     } catch (fillErr: any) {
       console.error(
         "[generateResume] Error in fillResumeTemplate:",
@@ -189,10 +180,6 @@ export async function generateResumeDocx(req: Request, res: Response) {
 export async function extractTemplateData(req: Request, res: Response) {
   try {
     const { resumeText, improvements } = req.body;
-    console.log("extractTemplateData called with:", {
-      resumeText: resumeText?.slice(0, 100) + "...",
-      improvementsCount: improvements?.length,
-    });
 
     if (!resumeText) {
       return res.status(400).json({ error: "Missing resume text" });
@@ -282,11 +269,7 @@ Return ONLY valid JSON with this structure:
         .replace(/```/g, "")
         .trim();
 
-      console.log("AI Response:", cleanedResponse);
-
       const extractedData = JSON.parse(cleanedResponse);
-
-      console.log("Extracted template data:", extractedData);
 
       return res.json({
         success: true,

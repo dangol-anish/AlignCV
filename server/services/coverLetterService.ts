@@ -21,20 +21,11 @@ export async function generateCoverLetter({
   jobDescription,
   answers,
 }: GenerateCoverLetterParams) {
-  console.log("\n=== COVER LETTER GENERATION START ===");
-  console.log("Input Parameters:", {
-    userId,
-    resumeId,
-    hasJobDescription: !!jobDescription,
-    answerKeys: Object.keys(answers),
-  });
-
   let resumeText = "";
   let contextInfo = "";
 
   // Fetch resume if provided
   if (resumeId) {
-    console.log("\nFetching resume with ID:", resumeId);
     const { data: resume, error: resumeError } = await supabase
       .from("resumes")
       .select("raw_text, original_filename")
@@ -58,22 +49,14 @@ export async function generateCoverLetter({
       .replace(/([.!?])\s*/g, "$1\n") // Add newline after sentences
       .replace(/([A-Z][a-z]+:)/g, "\n$1") // Add newline before section headers
       .trim();
-
-    console.log(
-      "Successfully fetched resume text for:",
-      resume.original_filename
-    );
-    console.log("Resume text preview:", resumeText.substring(0, 200) + "...");
   }
 
   // Build context from available information
   if (jobDescription) {
     contextInfo += `Job Description:\n${jobDescription}\n\n`;
-    console.log("\nJob Description:", jobDescription);
   } else {
     contextInfo +=
       "No specific job description provided. Please write a general cover letter that highlights the candidate's strengths and experience.\n\n";
-    console.log("\nNo job description provided");
   }
 
   // Add any provided answers to context
@@ -83,7 +66,6 @@ export async function generateCoverLetter({
 
   if (nonEmptyAnswers.length > 0) {
     contextInfo += "Additional Information:\n" + nonEmptyAnswers.join("\n\n");
-    console.log("\nAdditional Information:", nonEmptyAnswers);
   }
 
   // Prepare prompt with available information
@@ -108,15 +90,8 @@ export async function generateCoverLetter({
     prompt +
     "\n\nIMPORTANT: Use the actual information from the resume. Do not use placeholders like [Your Name]. Replace them with the actual information provided in the resume.";
 
-  console.log("\n=== FINAL PROMPT SENT TO AI ===");
-  console.log(enhancedPrompt);
-  console.log("\n=== END OF PROMPT ===");
-
   // Generate cover letter using AI
   const aiText = await generateContentWithRetry(enhancedPrompt);
-  console.log("\n=== AI RESPONSE ===");
-  console.log(aiText);
-  console.log("\n=== END OF AI RESPONSE ===");
 
   // Store the cover letter
   const { data: result, error: storeError } = await supabase
@@ -143,11 +118,6 @@ export async function generateCoverLetter({
       "Failed to store cover letter: No result returned from database"
     );
   }
-
-  console.log("\n=== STORED COVER LETTER ===");
-  console.log("ID:", result.id);
-  console.log("Content:", result.cover_letter);
-  console.log("\n=== COVER LETTER GENERATION COMPLETE ===\n");
 
   return result;
 }

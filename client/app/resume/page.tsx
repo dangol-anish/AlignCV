@@ -23,7 +23,6 @@ export default function ResumeListPage() {
     fetchUserResumes(user.token)
       .then((resumes) => {
         setResumes(resumes);
-        console.log("Fetched resumes:", resumes);
       })
       .catch(async (e) => {
         let message = e.message;

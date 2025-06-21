@@ -5,9 +5,28 @@ import cors from "cors";
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://aligncv.vercel.app", // Your production domain
+];
+
 app.use(
   cors({
-    origin: "*", // Allow all origins
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      // Allow dynamically generated Vercel preview URLs
+      if (origin.endsWith("-aligncv.vercel.app")) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })

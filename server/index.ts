@@ -4,10 +4,10 @@ dotenv.config();
 import { app } from "./loaders/app";
 import { verifySupabaseJWT } from "./utils/verifySupabaseJWT";
 
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || "3000", 10);
 
-app.listen(PORT, () => {
-  console.log(`Server listening on http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server listening on port ${PORT}`);
 });
 
 // Example protected route

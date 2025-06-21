@@ -36,39 +36,24 @@ export async function matchResumeToJob({
   console.log(
     "✅ [ISOLATION TEST] Supabase resume fetch successful. Bypassing Gemini."
   );
-  return {
-    id: "test-id",
-    user_id: userId,
-    resume_id: resumeId,
-    job_description: "test",
-    company_name: "test",
-    ai_analysis: {
-      job_title: "test",
-      match_score: 0,
-      strengths: [],
-      gaps: [],
-      suggestions: [],
-    },
-    match_score: 0,
-    strengths: [],
-    gaps: [],
-    suggestions: [],
-    created_at: new Date().toISOString(),
-  };
 
-  /*
   // Prepare prompt
   const prompt = jobMatchPrompt
     .replace("{{RESUME_TEXT}}", resume.raw_text || "")
     .replace("{{JOB_DESCRIPTION}}", jobDescription);
+
+  console.log("✅ [ISOLATION TEST] About to call Gemini API...");
+
   // Call Gemini
   let aiText;
   try {
     aiText = await generateContentWithRetry(prompt);
+    console.log("✅ [ISOLATION TEST] Gemini API call successful!");
   } catch (err: any) {
     console.error("[jobMatchingService] Error calling Gemini API:", err);
     throw new Error("Gemini API call failed: " + (err?.message || err));
   }
+
   let ai_analysis;
   let job_title;
   try {
@@ -79,6 +64,7 @@ export async function matchResumeToJob({
         .trim()
     );
     job_title = ai_analysis.job_title;
+    console.log("✅ [ISOLATION TEST] JSON parsing successful!");
   } catch (e) {
     console.error(
       "[jobMatchingService] Failed to parse AI response:",
@@ -87,6 +73,7 @@ export async function matchResumeToJob({
     );
     throw new Error("Failed to parse AI response: " + aiText);
   }
+
   // Store result
   const { match_score, strengths, gaps, suggestions } = ai_analysis;
   const { data: result, error: storeError } = await supabase
@@ -113,8 +100,9 @@ export async function matchResumeToJob({
     );
     throw new Error("Failed to store job matching result");
   }
+
+  console.log("✅ [ISOLATION TEST] Database insert successful!");
   return result as IJobMatchingResult;
-  */
 }
 
 export async function getJobMatchingResultsForUser(userId: string) {

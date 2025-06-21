@@ -8,7 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { useUserStore } from "@/lib/useUserStore";
 import ReactMarkdown from "react-markdown";
 
-export default function JobMatchPage({ params }: { params: { id: string } }) {
+type Props = {
+  params: { id: string };
+};
+
+export default function JobMatchPage({ params }: Props) {
   const [match, setMatch] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -1,18 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useUserStore } from "@/lib/useUserStore";
 import ReactMarkdown from "react-markdown";
 
-type Props = {
-  params: { id: string };
-};
-
-export default function JobMatchPage({ params }: Props) {
+export default function JobMatchPage() {
+  const params = useParams();
   const [match, setMatch] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

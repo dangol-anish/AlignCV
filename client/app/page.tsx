@@ -61,7 +61,6 @@ export default function Home() {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [userResumes, setUserResumes] = useState<IResume[]>([]);
-  const [selectedResumeId, setSelectedResumeId] = useState<string>("");
   const [analyzeLoading, setAnalyzeLoading] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<string | null>(null);
   const [analyzeResult, setAnalyzeResult] = useState<AnalysisResult | null>(
@@ -89,7 +88,6 @@ export default function Home() {
     }
 
     // Clear any previous selection
-    setSelectedResumeId("");
     setFile(selectedFile);
 
     // Start analysis immediately
@@ -237,8 +235,6 @@ export default function Home() {
               setFile={setFile}
               message={message}
               isLoading={isLoading}
-              selectedResumeId={selectedResumeId}
-              setSelectedResumeId={setSelectedResumeId}
               analyzeLoading={analyzeLoading}
               analyzeError={analyzeError}
               analyzeResult={analyzeResult}

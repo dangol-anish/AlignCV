@@ -11,6 +11,7 @@ import {
   CategoryInsights,
   DynamicResumeSections,
 } from "@/types/resume";
+import { useResumeSelectionStore } from "@/lib/useResumeSelectionStore";
 
 interface ResumeImprovement {
   original: string;
@@ -32,7 +33,6 @@ export function useResumeAnalysis() {
     ResumeImprovement[]
   >([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedResumeId, setSelectedResumeId] = useState<string>("");
   const [analyzeLoading, setAnalyzeLoading] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<string | null>(null);
   const [analyzeResult, setAnalyzeResult] = useState<any>(null);
@@ -40,6 +40,7 @@ export function useResumeAnalysis() {
   const router = useRouter();
   const setResults = useResumeAnalysisStore((state) => state.setResults);
   const user = useUserStore((state) => state.user);
+  const { selectedResumeId, setSelectedResumeId } = useResumeSelectionStore();
 
   const handleAnalyzeOrUpload = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();

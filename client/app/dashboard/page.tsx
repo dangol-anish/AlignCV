@@ -24,13 +24,13 @@ import {
 import { ChevronDown, ChevronDownIcon, FileText, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import DividerSm from "@/components/DividerSm";
+import { useResumeSelectionStore } from "@/lib/useResumeSelectionStore";
 
 export default function Dashboard() {
   const [analyses, setAnalyses] = useState<any[]>([]);
   const [jobMatches, setJobMatches] = useState<any[]>([]);
   const [coverLetters, setCoverLetters] = useState<any[]>([]);
   const [userResumes, setUserResumes] = useState<IResume[]>([]);
-  const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -45,6 +45,9 @@ export default function Dashboard() {
   const [dropdownWidth, setDropdownWidth] = useState<number | undefined>(
     undefined
   );
+
+  // Use persistent resume selection store
+  const { selectedResumeId, setSelectedResumeId } = useResumeSelectionStore();
 
   // Scroll to top on mount to prevent browser restoring scroll position to bottom
   useEffect(() => {

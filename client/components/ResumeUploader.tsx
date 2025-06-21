@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
+import { useResumeSelectionStore } from "@/lib/useResumeSelectionStore";
 
 interface AnalysisResult {
   extractedText: string;
@@ -30,8 +31,6 @@ interface ResumeUploaderProps {
   setFile: (file: File | null) => void;
   message: string;
   isLoading: boolean;
-  selectedResumeId: string;
-  setSelectedResumeId: (id: string) => void;
   analyzeLoading: boolean;
   analyzeError: string | null;
   analyzeResult: AnalysisResult | null;
@@ -48,8 +47,6 @@ export default function ResumeUploader({
   setFile,
   message,
   isLoading,
-  selectedResumeId,
-  setSelectedResumeId,
   analyzeLoading,
   analyzeError,
   analyzeResult,
@@ -58,11 +55,12 @@ export default function ResumeUploader({
   userResumes,
 }: ResumeUploaderProps) {
   const user = useUserStore((state) => state.user);
+  const { selectedResumeId, setSelectedResumeId } = useResumeSelectionStore();
   const [isDragging, setIsDragging] = useState(false);
 
   const resetAnalysis = () => {
     setFile(null);
-    setSelectedResumeId("");
+    setSelectedResumeId(null);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -87,7 +85,7 @@ export default function ResumeUploader({
       }
       // Set the file first
       setFile(droppedFile);
-      setSelectedResumeId(""); // clear dropdown selection if file is chosen
+      setSelectedResumeId(null); // clear dropdown selection if file is chosen
 
       // Wait for state to update
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -165,7 +163,7 @@ export default function ResumeUploader({
 
             {user && !isLoading && !analyzeLoading && (
               <div>
-                <DropdownMenu>
+                <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
@@ -178,7 +176,7 @@ export default function ResumeUploader({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="center"
-                    className="w-[280px] bg-stone-800 border-stone-700"
+                    className="w-[280px] bg-stone-800 border-stone-700 max-h-[300px] overflow-hidden"
                   >
                     {userResumes.length === 0 ? (
                       <div className="p-4 text-center">
@@ -192,27 +190,31 @@ export default function ResumeUploader({
                           Your stored resumes
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator className="bg-stone-700" />
-                        {userResumes.map((resume) => (
-                          <DropdownMenuItem
-                            key={resume.id}
-                            className="text-stone-100 hover:bg-stone-700 cursor-pointer focus:bg-stone-700 transition-colors duration-150"
-                            onClick={() => handleStoredResumeSelect(resume.id)}
-                          >
-                            <div className="flex flex-col w-full">
-                              <div className="flex items-center gap-2">
-                                <FileText className="h-4 w-4 text-stone-400" />
-                                <span className="font-medium truncate">
-                                  {resume.original_filename}
+                        <div className="max-h-[200px] overflow-y-auto">
+                          {userResumes.map((resume) => (
+                            <DropdownMenuItem
+                              key={resume.id}
+                              className="text-stone-100 hover:bg-stone-700 cursor-pointer focus:bg-stone-700 transition-colors duration-150"
+                              onClick={() =>
+                                handleStoredResumeSelect(resume.id)
+                              }
+                            >
+                              <div className="flex flex-col w-full">
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-4 w-4 text-stone-400" />
+                                  <span className="font-medium truncate">
+                                    {resume.original_filename}
+                                  </span>
+                                </div>
+                                <span className="text-xs text-stone-400 mt-0.5">
+                                  {new Date(
+                                    resume.uploaded_at
+                                  ).toLocaleDateString()}
                                 </span>
                               </div>
-                              <span className="text-xs text-stone-400 mt-0.5">
-                                {new Date(
-                                  resume.uploaded_at
-                                ).toLocaleDateString()}
-                              </span>
-                            </div>
-                          </DropdownMenuItem>
-                        ))}
+                            </DropdownMenuItem>
+                          ))}
+                        </div>
                       </>
                     )}
                   </DropdownMenuContent>

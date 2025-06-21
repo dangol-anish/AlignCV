@@ -470,14 +470,17 @@ export default function ResumeTemplatesPage() {
 
     try {
       // First, extract structured data using AI
-      const extractRes = await fetch("/api/upload/extract-template-data", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          resumeText: JSON.stringify(parsedData), // Send the parsed data as text
-          improvements: resumeImprovements,
-        }),
-      });
+      const extractRes = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/upload/extract-template-data`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            resumeText: JSON.stringify(parsedData), // Send the parsed data as text
+            improvements: resumeImprovements,
+          }),
+        }
+      );
 
       if (!extractRes.ok) {
         const extractError = await extractRes.json();
@@ -498,11 +501,14 @@ export default function ResumeTemplatesPage() {
       // Store the transformed data for downloads
       setTransformedData(transformedData);
 
-      const res = await fetch("/api/upload/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ template, data: transformedData }),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/upload/generate`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ template, data: transformedData }),
+        }
+      );
 
       if (!res.ok) {
         let msg = "Failed to generate resume";
@@ -579,11 +585,14 @@ export default function ResumeTemplatesPage() {
 
     setDownloading(true);
     try {
-      const res = await fetch("/api/upload/generate-pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ template: selected, data: transformedData }),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/upload/generate-pdf`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ template: selected, data: transformedData }),
+        }
+      );
       if (!res.ok) {
         const errorText = await res.text();
         console.error("PDF generation failed:", errorText);
@@ -619,11 +628,14 @@ export default function ResumeTemplatesPage() {
 
     setDownloading(true);
     try {
-      const res = await fetch("/api/upload/generate-docx", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ template: selected, data: transformedData }),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/upload/generate-docx`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ template: selected, data: transformedData }),
+        }
+      );
       if (!res.ok) {
         const errorText = await res.text();
         console.error("DOCX generation failed:", errorText);

@@ -69,18 +69,21 @@ export default function JobMatchingPage() {
     setLoading(true);
     try {
       if (!user) throw new Error("User not authenticated");
-      const res = await fetch("/api/job-matching", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: JSON.stringify({
-          resume_id: selectedResume,
-          job_description: jobDescription,
-          company_name: companyName,
-        }),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/job-matching`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+          body: JSON.stringify({
+            resume_id: selectedResume,
+            job_description: jobDescription,
+            company_name: companyName,
+          }),
+        }
+      );
       if (!res.ok) {
         let msg = "Failed to match resume";
         try {

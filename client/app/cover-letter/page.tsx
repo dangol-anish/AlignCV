@@ -58,11 +58,14 @@ export default function CoverLetterPage() {
   const fetchResumes = async () => {
     try {
       setResumesLoading(true);
-      const response = await fetch("/api/resumes", {
-        headers: {
-          Authorization: `Bearer ${user?.token}`,
-        },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/resumes`,
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch resumes");
@@ -95,20 +98,25 @@ export default function CoverLetterPage() {
 
     try {
       setLoading(true);
-      const response = await fetch("/api/cover-letter/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user?.token}`,
-        },
-        body: JSON.stringify({
-          resume_id: selectedResumeId || undefined,
-          job_description: jobDescription,
-          answers: Object.fromEntries(
-            Object.entries(answers).filter(([_, value]) => value.trim() !== "")
-          ),
-        }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/cover-letter/generate`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user?.token}`,
+          },
+          body: JSON.stringify({
+            resume_id: selectedResumeId || undefined,
+            job_description: jobDescription,
+            answers: Object.fromEntries(
+              Object.entries(answers).filter(
+                ([_, value]) => value.trim() !== ""
+              )
+            ),
+          }),
+        }
+      );
 
       const data = await response.json();
 

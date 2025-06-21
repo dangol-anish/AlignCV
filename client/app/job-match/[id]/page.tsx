@@ -39,11 +39,14 @@ export default function JobMatchPage() {
     const fetchMatch = async () => {
       try {
         const id = params.id as string;
-        const response = await fetch(`/api/job-matching/${id}`, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/job-matching/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           const errorData = await response.json();

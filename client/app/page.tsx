@@ -104,10 +104,13 @@ export default function Home() {
       const formData = new FormData();
       formData.append("file", resumeFile);
 
-      const response = await fetch("https://aligncv.onrender.com/api/analyze", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/analyze`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -120,7 +123,7 @@ export default function Home() {
       if (user?.token) {
         const uploadFormData = new FormData();
         uploadFormData.append("file", resumeFile);
-        await fetch("https://aligncv.onrender.com/api/upload", {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${user.token}`,
@@ -164,14 +167,17 @@ export default function Home() {
     setFile(null);
 
     try {
-      const response = await fetch("https://aligncv.onrender.com/api/analyze", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: JSON.stringify({ resume_id: resumeId }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/analyze`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+          body: JSON.stringify({ resume_id: resumeId }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();

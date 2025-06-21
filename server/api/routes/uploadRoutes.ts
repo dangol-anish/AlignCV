@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   handleFileUpload,
+  saveResumeEdit,
   generateResume,
   generateResumePdf,
   generateResumeDocx,
@@ -22,7 +23,7 @@ const upload = multer({
   limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit
 });
 
-// POST /api/upload - upload and store resume
+// POST /api/upload - handles file upload and returns raw text
 router.post(
   "/",
   authMiddleware,
@@ -33,6 +34,9 @@ router.post(
   handleFileUpload
 );
 
+// POST /api/upload/save-edit - save resume edit
+router.post("/save-edit", authMiddleware, saveResumeEdit);
+
 // POST /api/upload/generate - generate resume HTML
 router.post("/generate", generateResume);
 
@@ -42,7 +46,7 @@ router.post("/generate-pdf", generateResumePdf);
 // POST /api/upload/generate-docx - generate resume DOCX
 router.post("/generate-docx", generateResumeDocx);
 
-// POST /api/upload/extract-template-data - extract structured data for templates
+// POST /api/upload/extract-template-data - extract data for templates
 router.post("/extract-template-data", extractTemplateData);
 
 export default router;

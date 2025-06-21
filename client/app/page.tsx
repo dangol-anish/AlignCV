@@ -104,7 +104,7 @@ export default function Home() {
       const formData = new FormData();
       formData.append("file", resumeFile);
 
-      const response = await fetch("http://localhost:3000/api/analyze", {
+      const response = await fetch("https://aligncv.onrender.com/api/analyze", {
         method: "POST",
         body: formData,
       });
@@ -120,7 +120,7 @@ export default function Home() {
       if (user?.token) {
         const uploadFormData = new FormData();
         uploadFormData.append("file", resumeFile);
-        await fetch("http://localhost:3000/api/upload", {
+        await fetch("https://aligncv.onrender.com/api/upload", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${user.token}`,
@@ -164,7 +164,7 @@ export default function Home() {
     setFile(null);
 
     try {
-      const response = await fetch("http://localhost:3000/api/analyze", {
+      const response = await fetch("https://aligncv.onrender.com/api/analyze", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

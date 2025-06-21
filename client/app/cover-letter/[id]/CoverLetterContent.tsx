@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { useUserStore } from "@/lib/useUserStore";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Printer, Pencil, FileDown, FileText, Loader2 } from "lucide-react";
+import { Copy, Check } from "lucide-react";
 
 interface CoverLetter {
   id: string;
@@ -28,7 +28,7 @@ export default function CoverLetterContent() {
   const [coverLetter, setCoverLetter] = useState<CoverLetter | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [downloading, setDownloading] = useState<"pdf" | "docx" | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     // Wait for authentication to complete before checking user state
@@ -46,11 +46,14 @@ export default function CoverLetterContent() {
       setError(null);
 
       try {
-        const response = await fetch(`/api/cover-letter/${id}`, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/cover-letter/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          }
+        );
 
         const data = await response.json();
 
@@ -76,6 +79,14 @@ export default function CoverLetterContent() {
 
     fetchCoverLetter();
   }, [id, user?.token, router, authLoading]);
+
+  const handleCopy = () => {
+    if (coverLetter?.cover_letter) {
+      navigator.clipboard.writeText(coverLetter.cover_letter);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
+    }
+  };
 
   // Show loading while authentication is being determined
   if (authLoading) {
@@ -121,41 +132,6 @@ export default function CoverLetterContent() {
     );
   }
 
-  const handleDownload = async (type: "pdf" | "docx") => {
-    setDownloading(type);
-    try {
-      const endpoint = `/api/cover-letter/${id}/${type}`;
-      const res = await fetch(endpoint, {
-        headers: { Authorization: `Bearer ${user?.token}` },
-      });
-      if (!res.ok) {
-        const text = await res.text();
-        alert(`Failed to download ${type.toUpperCase()}: ${text}`);
-        console.error(`Download error for ${type}:`, text);
-        return;
-      }
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.style.display = "none";
-      a.href = url;
-      a.download = `cover-letter-${id}.${type}`;
-      document.body.appendChild(a);
-      setTimeout(() => {
-        a.click();
-        setTimeout(() => {
-          window.URL.revokeObjectURL(url);
-          a.remove();
-        }, 3000);
-      }, 100);
-    } catch (err) {
-      alert(`Unexpected error: ${err}`);
-      console.error("Unexpected download error:", err);
-    } finally {
-      setDownloading(null);
-    }
-  };
-
   return (
     <div className="flex flex-col gap-4 ">
       <div className="bg-stone-950 text-stone-100 rounded-xl shadow-lg  mb-8">
@@ -173,27 +149,14 @@ export default function CoverLetterContent() {
         <div className="flex flex-col sm:flex-row gap-4 mt-8">
           <Button
             className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-stone-100 font-light rounded-md shadow-md transition-all duration-200 flex items-center justify-center gap-2"
-            disabled={downloading === "pdf"}
-            onClick={() => handleDownload("pdf")}
+            onClick={handleCopy}
           >
-            {downloading === "pdf" ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
+            {copied ? (
+              <Check className="h-5 w-5 text-green-400" />
             ) : (
-              <FileDown className="h-5 w-5" />
+              <Copy className="h-5 w-5" />
             )}
-            PDF
-          </Button>
-          <Button
-            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-stone-100 font-light rounded-md shadow-md transition-all duration-200 flex items-center justify-center gap-2"
-            disabled={downloading === "docx"}
-            onClick={() => handleDownload("docx")}
-          >
-            {downloading === "docx" ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <FileText className="h-5 w-5" />
-            )}
-            DOCX
+            {copied ? "Copied!" : "Copy Cover Letter"}
           </Button>
         </div>
       </div>

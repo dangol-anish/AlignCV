@@ -983,14 +983,6 @@ export default function ResumeTemplatesPage() {
                         Download as HTML
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={handleDownloadPdf}
-                        className="text-stone-100 hover:bg-stone-700 hover:text-stone-100 cursor-pointer"
-                        disabled={downloading}
-                      >
-                        <FileText className="h-4 w-4 mr-2" />
-                        Download as PDF
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
                         onClick={handleDownloadDocx}
                         className="text-stone-100 hover:bg-stone-700 hover:text-stone-100 cursor-pointer"
                         disabled={downloading}

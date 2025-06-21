@@ -34,11 +34,14 @@ export default function ResumeAnalysisPage() {
 
     const fetchAnalysis = async () => {
       try {
-        const response = await fetch(`/api/resumes/analyses/${params.id}`, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/resumes/analyses/${params.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Failed to fetch analysis");
@@ -48,11 +51,14 @@ export default function ResumeAnalysisPage() {
         setAnalysis(data.analysis);
 
         // We need to fetch the resume to get the parsed_data
-        const resumeResponse = await fetch(`/api/resumes/${params.id}`, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        });
+        const resumeResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/resumes/${params.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          }
+        );
 
         let parsedData = null;
         if (resumeResponse.ok) {
@@ -63,14 +69,17 @@ export default function ResumeAnalysisPage() {
           // If parsed_data is missing, try to re-analyze the resume
           if (!parsedData) {
             try {
-              const reAnalyzeResponse = await fetch("/api/analyze", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${user.token}`,
-                },
-                body: JSON.stringify({ resume_id: params.id }),
-              });
+              const reAnalyzeResponse = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/analyze`,
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${user.token}`,
+                  },
+                  body: JSON.stringify({ resume_id: params.id }),
+                }
+              );
 
               if (reAnalyzeResponse.ok) {
                 const reAnalyzeData = await reAnalyzeResponse.json();

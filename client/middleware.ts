@@ -25,7 +25,18 @@ export async function middleware(request: NextRequest) {
   // If the route is private and there's no session, redirect to auth
   if (!isPublicRoute && !session) {
     const url = new URL("/auth/signin", request.url);
+    // Preserve the original URL for redirect after login
     url.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(url);
+  }
+
+  // If user is authenticated and trying to access auth pages, redirect to dashboard
+  if (
+    session &&
+    pathname.startsWith("/auth/") &&
+    pathname !== "/auth/callback"
+  ) {
+    const url = new URL("/dashboard", request.url);
     return NextResponse.redirect(url);
   }
 

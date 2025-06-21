@@ -14,8 +14,14 @@ export default function JobMatchPage({ params }: { params: { id: string } }) {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const user = useUserStore((state) => state.user);
+  const authLoading = useUserStore((state) => state.authLoading);
 
   useEffect(() => {
+    // Wait for authentication to complete before checking user state
+    if (authLoading) {
+      return;
+    }
+
     if (!user) {
       router.replace("/auth/signin");
       return;
@@ -54,7 +60,16 @@ export default function JobMatchPage({ params }: { params: { id: string } }) {
     };
 
     fetchMatch();
-  }, [params.id, user, router]);
+  }, [params.id, user, router, authLoading]);
+
+  // Show loading while authentication is being determined
+  if (authLoading) {
+    return (
+      <div className="container mx-auto p-8">
+        <div className="text-center">Loading...</div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

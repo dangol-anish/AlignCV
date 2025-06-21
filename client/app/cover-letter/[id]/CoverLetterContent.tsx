@@ -24,12 +24,23 @@ export default function CoverLetterContent() {
   const params = useParams();
   const id = params.id;
   const { user } = useUserStore();
+  const authLoading = useUserStore((state) => state.authLoading);
   const [coverLetter, setCoverLetter] = useState<CoverLetter | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<"pdf" | "docx" | null>(null);
 
   useEffect(() => {
+    // Wait for authentication to complete before checking user state
+    if (authLoading) {
+      return;
+    }
+
+    if (!user?.token) {
+      router.replace("/auth/signin");
+      return;
+    }
+
     const fetchCoverLetter = async () => {
       console.log("\n=== FETCHING COVER LETTER ===");
       console.log("Cover letter ID:", id);
@@ -37,12 +48,6 @@ export default function CoverLetterContent() {
 
       setLoading(true);
       setError(null);
-
-      if (!user?.token) {
-        setError("Please log in to view cover letters");
-        setLoading(false);
-        return;
-      }
 
       try {
         const response = await fetch(`/api/cover-letter/${id}`, {
@@ -77,7 +82,53 @@ export default function CoverLetterContent() {
     };
 
     fetchCoverLetter();
-  }, [id, user?.token]);
+  }, [id, user?.token, router, authLoading]);
+
+  // Show loading while authentication is being determined
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading cover letter...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-destructive mb-2">Error loading cover letter</p>
+          <p className="text-sm text-muted-foreground">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!coverLetter) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-muted-foreground">Cover letter not found</p>
+        </div>
+      </div>
+    );
+  }
+
+  console.log("Rendering cover letter:", coverLetter);
 
   const handleDownload = async (type: "pdf" | "docx") => {
     setDownloading(type);
@@ -114,40 +165,6 @@ export default function CoverLetterContent() {
       setDownloading(null);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading cover letter...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <p className="text-destructive mb-2">Error loading cover letter</p>
-          <p className="text-sm text-muted-foreground">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!coverLetter) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <p className="text-muted-foreground">Cover letter not found</p>
-        </div>
-      </div>
-    );
-  }
-
-  console.log("Rendering cover letter:", coverLetter);
 
   return (
     <div className="flex flex-col gap-4 ">

@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useUserStore } from "@/lib/useUserStore";
+import { useResumeAnalysisStore } from "@/lib/useResumeAnalysisStore";
 import ReactMarkdown from "react-markdown";
 import DividerSm from "@/components/DividerSm";
 import { CheckCircle2, AlertCircle, Upload, FileText } from "lucide-react";
@@ -17,8 +18,15 @@ export default function ResumeAnalysisPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const user = useUserStore((state) => state.user);
+  const authLoading = useUserStore((state) => state.authLoading);
+  const setResults = useResumeAnalysisStore((state) => state.setResults);
 
   useEffect(() => {
+    // Wait for authentication to complete before checking user state
+    if (authLoading) {
+      return;
+    }
+
     if (!user) {
       router.replace("/auth/signin");
       return;
@@ -38,6 +46,66 @@ export default function ResumeAnalysisPage() {
 
         const data = await response.json();
         setAnalysis(data.analysis);
+
+        console.log("=== INDIVIDUAL ANALYSIS DEBUG ===");
+        console.log("Analysis data:", data.analysis);
+
+        // We need to fetch the resume to get the parsed_data
+        const resumeResponse = await fetch(`/api/resumes/${params.id}`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
+
+        let parsedData = null;
+        if (resumeResponse.ok) {
+          const resumeData = await resumeResponse.json();
+          console.log("Resume data:", resumeData);
+          parsedData = resumeData.resume.parsed_data;
+          console.log("Parsed data from resume:", parsedData);
+
+          // If parsed_data is missing, try to re-analyze the resume
+          if (!parsedData) {
+            console.log("No parsed_data found, attempting to re-analyze...");
+            try {
+              const reAnalyzeResponse = await fetch("/api/analyze", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${user.token}`,
+                },
+                body: JSON.stringify({ resume_id: params.id }),
+              });
+
+              if (reAnalyzeResponse.ok) {
+                const reAnalyzeData = await reAnalyzeResponse.json();
+                parsedData = reAnalyzeData.parsed;
+                console.log("Re-analyzed parsed data:", parsedData);
+              }
+            } catch (reAnalyzeError) {
+              console.error("Failed to re-analyze:", reAnalyzeError);
+            }
+          }
+        } else {
+          console.error("Failed to fetch resume:", resumeResponse.status);
+        }
+
+        const storeData = {
+          extractedText: "", // Not stored in analysis table
+          parsedData: parsedData,
+          atsScore: data.analysis.ats_score || null,
+          categoryInsights: data.analysis.category_insights || null,
+          resumeImprovements: data.analysis.line_improvements || [],
+        };
+
+        console.log("Setting store with:", storeData);
+        setResults(storeData);
+
+        // Verify store was set
+        setTimeout(() => {
+          const storeState = useResumeAnalysisStore.getState();
+          console.log("Store state after setting:", storeState);
+        }, 100);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -46,13 +114,22 @@ export default function ResumeAnalysisPage() {
     };
 
     fetchAnalysis();
-  }, [params.id, user, router]);
+  }, [params.id, user, router, setResults, authLoading]);
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-green-500";
     if (score >= 60) return "text-yellow-500";
     return "text-red-500";
   };
+
+  // Show loading while authentication is being determined
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-stone-950">
+        <div className="text-center text-stone-100">Loading...</div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -213,9 +290,16 @@ export default function ResumeAnalysisPage() {
           <Button
             variant="default"
             className="cursor-pointer flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-stone-100 shadow-md transition-all duration-200"
-            onClick={() => router.push("/dashboard")}
+            onClick={() => {
+              if (!user) {
+                router.push("/auth/signin?redirect=/resume/templates");
+              } else {
+                router.push("/resume/templates");
+              }
+            }}
           >
-            Resume Improvement
+            <FileText className="w-4 h-4 mr-2" />
+            Apply Improvements
           </Button>
         </div>
       </Card>

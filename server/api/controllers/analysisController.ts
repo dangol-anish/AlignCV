@@ -50,6 +50,7 @@ export async function analyzeResumeById(req: Request, res: Response) {
               mimetype: file.mimetype,
               size: file.size,
               raw_text: cleanedText,
+              parsed_data: parsedData,
             },
           ])
           .select()
@@ -203,6 +204,18 @@ export async function analyzeResumeById(req: Request, res: Response) {
         code: "ANALYSIS_STORAGE_ERROR",
         error: analysisError.message,
       });
+    }
+
+    // Update the resume with parsed data
+    console.log("Step 5: Updating resume with parsed data");
+    const { error: updateError } = await supabase
+      .from("resumes")
+      .update({ parsed_data: parsedData })
+      .eq("id", resume.id);
+
+    if (updateError) {
+      console.error("Failed to update resume with parsed data:", updateError);
+      // Don't fail the request, just log the error
     }
 
     console.log("Analysis completed successfully");

@@ -22,6 +22,17 @@ export default function ResumeTemplatesPage() {
     { key: "simple", label: "Simple" },
   ];
 
+  // Temporary debugging
+  useEffect(() => {
+    console.log("=== TEMPLATES PAGE DEBUG ===");
+    console.log("parsedData:", parsedData);
+    console.log("resumeImprovements:", resumeImprovements);
+    console.log("parsedData type:", typeof parsedData);
+    console.log("parsedData is null:", parsedData === null);
+    console.log("parsedData is undefined:", parsedData === undefined);
+    console.log("Store state:", useResumeAnalysisStore.getState());
+  }, [parsedData, resumeImprovements]);
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.replace("/auth/signin?redirect=/resume/templates");
@@ -30,6 +41,36 @@ export default function ResumeTemplatesPage() {
 
   if (authLoading) return <div>Loading...</div>;
   if (!user) return null;
+  if (!parsedData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-stone-950">
+        <div className="text-center text-stone-100">
+          <h2 className="text-2xl font-semibold mb-4">No Resume Data Found</h2>
+          <p className="text-stone-400 mb-6">
+            Please analyze a resume first to access templates.
+          </p>
+          <div className="space-y-2">
+            <Button
+              onClick={() => router.push("/")}
+              className="bg-blue-500 hover:bg-blue-600 text-white"
+            >
+              Go to Home
+            </Button>
+            <br />
+            <Button
+              onClick={() => {
+                useResumeAnalysisStore.getState().clearResults();
+                console.log("Store cleared");
+              }}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              Clear Store (Debug)
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Strictly apply improvements: replace any string field that exactly matches an 'original' in improvements with its 'suggestion'.
   function applyImprovementsDeep(obj: any, improvements: any[]): any {

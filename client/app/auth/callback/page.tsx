@@ -31,8 +31,10 @@ export default function AuthCallback() {
           token: session.access_token,
         });
       }
-      // Always redirect to http://localhost:3001/dashboard
-      window.location.href = "http://localhost:3001/dashboard";
+
+      // Get the redirect URL from the auth flow or default to dashboard
+      const redirectTo = searchParams.get("redirect") || "/dashboard";
+      router.replace(redirectTo);
     }
     handleOAuthCallback();
   }, [router, searchParams, setUser]);

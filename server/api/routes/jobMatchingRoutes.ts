@@ -21,15 +21,7 @@ router.post("/test", authMiddleware, (req, res) => {
 });
 
 // POST /api/job-matching
-router.post("/", authMiddleware, (req, res) => {
-  console.log("✅ [ISOLATION TEST] /api/job-matching (real endpoint) was hit!");
-  res
-    .status(200)
-    .json({
-      success: true,
-      message: "Bypassed Supabase and Gemini for testing.",
-    });
-});
+router.post("/", authMiddleware, matchJob);
 
 // GET /api/job-matching
 router.get("/", authMiddleware, getJobMatchesForUser);

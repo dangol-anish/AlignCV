@@ -26,8 +26,37 @@ export async function matchResumeToJob({
     .eq("user_id", userId)
     .single();
   if (resumeError || !resume) {
+    console.error(
+      "[ISOLATION TEST] Supabase resume fetch failed:",
+      resumeError
+    );
     throw new Error("Resume not found or access denied");
   }
+
+  console.log(
+    "✅ [ISOLATION TEST] Supabase resume fetch successful. Bypassing Gemini."
+  );
+  return {
+    id: "test-id",
+    user_id: userId,
+    resume_id: resumeId,
+    job_description: "test",
+    company_name: "test",
+    ai_analysis: {
+      job_title: "test",
+      match_score: 0,
+      strengths: [],
+      gaps: [],
+      suggestions: [],
+    },
+    match_score: 0,
+    strengths: [],
+    gaps: [],
+    suggestions: [],
+    created_at: new Date().toISOString(),
+  };
+
+  /*
   // Prepare prompt
   const prompt = jobMatchPrompt
     .replace("{{RESUME_TEXT}}", resume.raw_text || "")
@@ -85,6 +114,7 @@ export async function matchResumeToJob({
     throw new Error("Failed to store job matching result");
   }
   return result as IJobMatchingResult;
+  */
 }
 
 export async function getJobMatchingResultsForUser(userId: string) {

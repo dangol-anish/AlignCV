@@ -10,6 +10,13 @@ import authRoutes from "./authRoutes";
 
 const router = Router();
 
+router.get("/test", (req, res) => {
+  console.log("✅✅✅ /api/test endpoint was hit successfully! ✅✅✅");
+  res
+    .status(200)
+    .json({ success: true, message: "Hello from the test endpoint!" });
+});
+
 router.use("/users", usersRoutes);
 router.use("/test", testRoutes);
 router.use("/upload", uploadRoutes);

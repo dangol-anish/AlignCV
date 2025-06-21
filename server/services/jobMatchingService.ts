@@ -33,7 +33,13 @@ export async function matchResumeToJob({
     .replace("{{RESUME_TEXT}}", resume.raw_text || "")
     .replace("{{JOB_DESCRIPTION}}", jobDescription);
   // Call Gemini
-  const aiText = await generateContentWithRetry(prompt);
+  let aiText;
+  try {
+    aiText = await generateContentWithRetry(prompt);
+  } catch (err: any) {
+    console.error("[jobMatchingService] Error calling Gemini API:", err);
+    throw new Error("Gemini API call failed: " + (err?.message || err));
+  }
   let ai_analysis;
   let job_title;
   try {
@@ -45,6 +51,11 @@ export async function matchResumeToJob({
     );
     job_title = ai_analysis.job_title;
   } catch (e) {
+    console.error(
+      "[jobMatchingService] Failed to parse AI response:",
+      aiText,
+      e
+    );
     throw new Error("Failed to parse AI response: " + aiText);
   }
   // Store result
@@ -67,6 +78,10 @@ export async function matchResumeToJob({
     .select()
     .single();
   if (storeError || !result) {
+    console.error(
+      "[jobMatchingService] Failed to store job matching result:",
+      storeError
+    );
     throw new Error("Failed to store job matching result");
   }
   return result as IJobMatchingResult;

@@ -26,6 +26,7 @@ export async function matchJob(req: Request, res: Response) {
     });
     return res.json({ success: true, result });
   } catch (err: any) {
+    console.error("[/api/job-matching] Error:", err);
     return res.status(500).json({
       success: false,
       message: err.message || "Failed to match resume to job",

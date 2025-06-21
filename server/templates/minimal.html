@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <title>Resume</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
       rel="stylesheet"
     />
     <style>
@@ -16,108 +16,133 @@
 
       body {
         font-family: "Inter", sans-serif;
-        font-size: 13px;
-        color: #111827;
+        font-size: 12px;
+        color: #1f2937;
         line-height: 1.4;
-        max-width: 800px;
+        max-width: 700px;
         margin: 0 auto;
         padding: 25px;
         background: #fff;
       }
 
       .header {
-        text-align: center;
-        margin-bottom: 20px;
-        border-bottom: 2px solid #3b82f6;
-        padding-bottom: 10px;
+        text-align: left;
+        margin-bottom: 25px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #e5e7eb;
       }
 
       .name {
-        font-size: 24px;
-        font-weight: 600;
+        font-size: 28px;
+        font-weight: 300;
+        color: #111827;
+        margin-bottom: 8px;
+        letter-spacing: -0.02em;
       }
 
       .contact {
-        font-size: 13px;
+        font-size: 12px;
         color: #6b7280;
+        font-weight: 400;
       }
 
       .section {
-        margin-bottom: 20px;
+        margin-bottom: 22px;
       }
 
       .section-title {
         font-weight: 600;
-        font-size: 15px;
-        color: #3b82f6;
+        font-size: 14px;
+        color: #111827;
         text-transform: uppercase;
-        letter-spacing: 0.03em;
+        letter-spacing: 0.1em;
         margin-bottom: 10px;
-        padding-bottom: 5px;
-        border-bottom: 1px solid #d1d5db;
+        position: relative;
       }
 
-      .divider {
-        height: 1px;
-        background-color: #e5e7eb;
-        margin: 20px 0;
+      .section-title::after {
+        content: "";
+        position: absolute;
+        bottom: -3px;
+        left: 0;
+        width: 20px;
+        height: 2px;
+        background-color: #6b7280;
       }
 
       .item {
-        margin-bottom: 12px;
+        margin-bottom: 15px;
+        padding-left: 0;
       }
 
       .item-header {
         display: flex;
         justify-content: space-between;
-        flex-wrap: wrap;
+        align-items: flex-start;
+        margin-bottom: 6px;
       }
 
       .item-title {
-        font-weight: 600;
-        font-size: 14px;
-      }
-
-      .item-company {
-        color: #2563eb;
         font-weight: 500;
+        color: #111827;
         font-size: 13px;
       }
 
-      .item-dates {
+      .item-company {
         color: #6b7280;
+        font-weight: 400;
         font-size: 12px;
+      }
+
+      .item-dates {
+        color: #9ca3af;
+        font-size: 11px;
+        font-weight: 400;
+        text-align: right;
+        min-width: 80px;
       }
 
       .item-description {
         margin-top: 6px;
-        padding-left: 15px;
+        padding-left: 0;
       }
 
       .item-description ul {
-        list-style: disc;
+        list-style: none;
         margin-left: 0;
-        padding-left: 20px;
+        padding-left: 0;
       }
 
       .item-description li {
         margin-bottom: 4px;
-        font-size: 12px;
+        position: relative;
+        padding-left: 12px;
+        font-size: 11px;
+        color: #4b5563;
         line-height: 1.4;
+      }
+
+      .item-description li::before {
+        content: "•";
+        position: absolute;
+        left: 0;
+        color: #9ca3af;
+        font-weight: bold;
       }
 
       .skills {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
+        gap: 6px;
       }
 
       .skill-item {
-        background: #f3f4f6;
-        padding: 4px 10px;
-        border-radius: 4px;
-        font-size: 12px;
-        border-left: 3px solid #111827;
+        background: #f9fafb;
+        padding: 3px 8px;
+        border-radius: 3px;
+        font-size: 11px;
+        color: #4b5563;
+        border: 1px solid #e5e7eb;
       }
 
       .skill-category {
@@ -125,8 +150,8 @@
       }
 
       .skill-category-title {
-        font-weight: 600;
-        font-size: 13px;
+        font-weight: 500;
+        font-size: 12px;
         color: #374151;
         margin-bottom: 5px;
         text-transform: uppercase;
@@ -134,7 +159,7 @@
       }
 
       .skill-category-items {
-        font-size: 12px;
+        font-size: 11px;
         color: #6b7280;
         line-height: 1.4;
       }
@@ -147,28 +172,34 @@
         font-size: inherit;
       }
 
+      .divider {
+        height: 1px;
+        background-color: #f3f4f6;
+        margin: 20px 0;
+      }
+
       @media print {
         body {
-          padding: 10mm;
-          font-size: 11px;
+          padding: 8mm;
+          font-size: 10px;
           line-height: 1.3;
         }
 
         .header {
           margin-bottom: 18px;
-          padding-bottom: 8px;
+          padding-bottom: 10px;
         }
 
         .name {
-          font-size: 21px;
+          font-size: 22px;
         }
 
         .section {
-          margin-bottom: 18px;
+          margin-bottom: 16px;
         }
 
         .section-title {
-          font-size: 12px;
+          font-size: 11px;
           margin-bottom: 8px;
         }
 
@@ -177,11 +208,11 @@
         }
 
         .item-title {
-          font-size: 12px;
+          font-size: 11px;
         }
 
         .item-description li {
-          font-size: 10px;
+          font-size: 9px;
           margin-bottom: 2px;
         }
       }
@@ -191,15 +222,15 @@
     <div class="header">
       <div class="name">{{name}}</div>
       {{#if email}}{{#if phone}}{{#if location}}
-      <div class="contact">{{email}} ❖ {{phone}} ❖ {{location}}</div>
+      <div class="contact">{{email}} • {{phone}} • {{location}}</div>
       {{else}}
-      <div class="contact">{{email}} ❖ {{phone}}</div>
+      <div class="contact">{{email}} • {{phone}}</div>
       {{/if}}{{else}}{{#if location}}
-      <div class="contact">{{email}} ❖ {{location}}</div>
+      <div class="contact">{{email}} • {{location}}</div>
       {{else}}
       <div class="contact">{{email}}</div>
       {{/if}}{{/if}}{{else}}{{#if phone}}{{#if location}}
-      <div class="contact">{{phone}} ❖ {{location}}</div>
+      <div class="contact">{{phone}} • {{location}}</div>
       {{else}}
       <div class="contact">{{phone}}</div>
       {{/if}}{{else}}{{#if location}}
@@ -209,14 +240,15 @@
 
     {{#if work}} {{#if work.length}}
     <div class="section">
-      <div class="section-title">Work Experience</div>
+      <div class="section-title">Experience</div>
       {{#each work}}
       <div class="item">
         <div class="item-header">
           <div>
-            <span class="item-title">{{title}}</span>{{#if company}},<span
+            <span class="item-title">{{title}}</span>{{#if company}}<span
               class="item-company"
-              >{{company}}</span
+            >
+              at {{company}}</span
             >{{/if}}
           </div>
           {{#if dates}}
@@ -265,9 +297,9 @@
       <div class="item">
         <div class="item-header">
           <div>
-            <span class="item-title">{{degree}}</span>{{#if institution}},<span
+            <span class="item-title">{{degree}}</span>{{#if institution}}<span
               class="item-company"
-              >{{institution}}</span
+              >, {{institution}}</span
             >{{/if}}
           </div>
           {{#if dates}}

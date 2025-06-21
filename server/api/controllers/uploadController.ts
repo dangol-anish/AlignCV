@@ -8,6 +8,8 @@ import { analyzeResume } from "../../services/categoryClassifier";
 import { fillResumeTemplate } from "../../services/templateFiller";
 import { Request } from "express";
 import { htmlToPdf } from "../../services/pdfGenerator";
+import { generateResumeDocx as generateDocxFromData } from "../../services/docxGenerator";
+import { limitedGenerateContent } from "../../utils/geminiLimiter";
 
 export async function handleFileUpload(req: MulterRequest, res: Response) {
   const { originalname, mimetype, size } = req.file!;
@@ -154,5 +156,154 @@ export async function generateResumePdf(req: Request, res: Response) {
     return res
       .status(500)
       .json({ error: "Failed to generate PDF", details: err.message });
+  }
+}
+
+export async function generateResumeDocx(req: Request, res: Response) {
+  try {
+    const { template, data } = req.body;
+    if (!template || !data) {
+      return res.status(400).json({ error: "Missing template or data" });
+    }
+
+    try {
+      const docxBuffer = await generateDocxFromData(data);
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      );
+      res.setHeader("Content-Disposition", "attachment; filename=resume.docx");
+      return res.status(200).send(docxBuffer);
+    } catch (docxErr: any) {
+      return res
+        .status(500)
+        .json({ error: "Failed to generate DOCX", details: docxErr.message });
+    }
+  } catch (err: any) {
+    return res
+      .status(500)
+      .json({ error: "Failed to generate DOCX", details: err.message });
+  }
+}
+
+export async function extractTemplateData(req: Request, res: Response) {
+  try {
+    const { resumeText, improvements } = req.body;
+    console.log("extractTemplateData called with:", {
+      resumeText: resumeText?.slice(0, 100) + "...",
+      improvementsCount: improvements?.length,
+    });
+
+    if (!resumeText) {
+      return res.status(400).json({ error: "Missing resume text" });
+    }
+
+    // Create a comprehensive prompt for template data extraction
+    const extractionPrompt = `
+You are an expert resume parser. Extract structured data from this resume for template generation.
+
+RESUME TEXT:
+${resumeText}
+
+IMPROVEMENTS TO APPLY:
+${improvements ? JSON.stringify(improvements, null, 2) : "None"}
+
+Extract and structure the following information as JSON:
+
+1. PERSONAL INFORMATION:
+   - name: Full name (e.g., "John Doe")
+   - email: Email address (e.g., "john.doe@email.com")
+   - phone: Phone number (e.g., "+1-555-123-4567")
+   - location: City, State/Country (e.g., "New York, NY" or "London, UK")
+
+2. WORK EXPERIENCE (array of objects):
+   - title: Job title
+   - company: Company name
+   - dates: Employment period (e.g., "Jan 2023 - Present")
+   - description: Job description or key responsibilities
+
+3. EDUCATION (array of objects):
+   - degree: Degree name
+   - institution: School/University name
+   - dates: Graduation date or period
+   - details: GPA, honors, relevant coursework
+
+4. SKILLS (object with categorized skills):
+   Categorize skills into logical groups. Use these categories when applicable:
+   - "Programming Languages": Python, JavaScript, Java, C#, etc.
+   - "Frameworks & Libraries": React, Node.js, Express, Flask, etc.
+   - "Databases": PostgreSQL, MySQL, MongoDB, etc.
+   - "Tools & Platforms": Git, Docker, AWS, etc.
+   - "Other": Any skills that don't fit the above categories
+   
+   Example structure:
+   {
+     "Programming Languages": ["Python", "JavaScript", "Java"],
+     "Frameworks & Libraries": ["React", "Node.js", "Express"],
+     "Databases": ["PostgreSQL", "MongoDB"],
+     "Tools & Platforms": ["Git", "Docker", "AWS"]
+   }
+
+5. PROJECTS (array of objects):
+   - title: Project name
+   - dates: Project period (if available)
+   - description: Convert long descriptions into 3-5 bullet points. Each bullet should be concise and highlight key achievements, technologies used, and impact.
+
+6. SUMMARY (string):
+   - Professional summary or objective (2-3 sentences max)
+
+IMPORTANT GUIDELINES:
+- For contact info: Extract email, phone, and location separately. Look for patterns like "email@domain.com", phone numbers, and location mentions.
+- For projects: Break down long descriptions into bullet points. Each bullet should start with action verbs and be 1-2 lines max.
+- For skills: Categorize them logically. Don't create categories for single skills - group similar skills together.
+- Apply improvements: If an improvement matches the original text, use the suggested improvement instead.
+- Be precise: Extract exact values, don't make up information.
+
+Return ONLY valid JSON with this structure:
+{
+  "name": "string",
+  "email": "string", 
+  "phone": "string",
+  "location": "string",
+  "work": [{"title": "string", "company": "string", "dates": "string", "description": "string"}],
+  "education": [{"degree": "string", "institution": "string", "dates": "string", "details": "string"}],
+  "skills": {"category": ["skill1", "skill2"]},
+  "projects": [{"title": "string", "dates": "string", "description": "string"}],
+  "summary": "string"
+}
+`;
+
+    try {
+      const responseText = await limitedGenerateContent(extractionPrompt);
+
+      // Clean the response
+      const cleanedResponse = responseText
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+
+      console.log("AI Response:", cleanedResponse);
+
+      const extractedData = JSON.parse(cleanedResponse);
+
+      console.log("Extracted template data:", extractedData);
+
+      return res.json({
+        success: true,
+        data: extractedData,
+      });
+    } catch (aiError: any) {
+      console.error("AI extraction failed:", aiError);
+      return res.status(500).json({
+        error: "Failed to extract data with AI",
+        details: aiError.message,
+      });
+    }
+  } catch (err: any) {
+    console.error("[extractTemplateData] Error:", err);
+    return res.status(500).json({
+      error: "Failed to extract template data",
+      details: err.message,
+    });
   }
 }

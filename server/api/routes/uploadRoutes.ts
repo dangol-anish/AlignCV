@@ -1,27 +1,28 @@
 import { Router } from "express";
+import {
+  handleFileUpload,
+  generateResume,
+  generateResumePdf,
+  generateResumeDocx,
+  extractTemplateData,
+} from "../controllers/uploadController";
 import multer from "multer";
-import { handleFileUpload } from "../controllers/uploadController";
 import {
   validateFilePresence,
   validateMimeType,
   validateResumeLikelihood,
 } from "../middlewares/uploadValidators";
 import { authMiddleware } from "../middlewares/authMiddleware";
-import {
-  saveResumeEdit,
-  generateResume,
-  generateResumePdf,
-} from "../controllers/uploadController";
 
 const router = Router();
 
 const storage = multer.memoryStorage();
-
 const upload = multer({
   storage,
-  limits: { fileSize: 2 * 1024 * 1024 },
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit
 });
 
+// POST /api/upload - upload and store resume
 router.post(
   "/",
   authMiddleware,
@@ -32,11 +33,16 @@ router.post(
   handleFileUpload
 );
 
-// Protected route for saving resume edits
-router.post("/edit", authMiddleware, saveResumeEdit);
-
+// POST /api/upload/generate - generate resume HTML
 router.post("/generate", generateResume);
 
+// POST /api/upload/generate-pdf - generate resume PDF
 router.post("/generate-pdf", generateResumePdf);
+
+// POST /api/upload/generate-docx - generate resume DOCX
+router.post("/generate-docx", generateResumeDocx);
+
+// POST /api/upload/extract-template-data - extract structured data for templates
+router.post("/extract-template-data", extractTemplateData);
 
 export default router;

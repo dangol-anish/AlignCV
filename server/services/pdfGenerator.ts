@@ -2,8 +2,13 @@ import puppeteer from "puppeteer";
 
 export async function htmlToPdf(html: string): Promise<Buffer> {
   const browser = await puppeteer.launch({
-    executablePath: "/usr/bin/google-chrome",
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    executablePath: "/usr/bin/google-chrome-stable",
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+    ],
   });
   const page = await browser.newPage();
   await page.setContent(html, { waitUntil: "networkidle0" });

@@ -10,7 +10,7 @@ export default async function UsersPage() {
       {data.sampleUser.map((user: IUser) => (
         <div key={user.id} className="mb-2 p-2 border rounded">
           <p>
-            <strong>{user.name}</strong> ({user.email})
+            <strong>{user.email}</strong> (ID: {user.id})
           </p>
         </div>
       ))}

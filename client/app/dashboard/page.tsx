@@ -92,15 +92,24 @@ function DashboardContent() {
     setError(null);
 
     Promise.all([
-      fetch(`/api/resumes/analyses?resume_id=${selectedResumeId}`, {
-        headers: { Authorization: `Bearer ${user.token}` },
-      }).then((res) => res.json()),
-      fetch(`/api/job-matching?resume_id=${selectedResumeId}`, {
-        headers: { Authorization: `Bearer ${user.token}` },
-      }).then((res) => res.json()),
-      fetch(`/api/cover-letter?resume_id=${selectedResumeId}`, {
-        headers: { Authorization: `Bearer ${user.token}` },
-      }).then((res) => res.json()),
+      fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/resumes/analyses?resume_id=${selectedResumeId}`,
+        {
+          headers: { Authorization: `Bearer ${user.token}` },
+        }
+      ).then((res) => res.json()),
+      fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/job-matching?resume_id=${selectedResumeId}`,
+        {
+          headers: { Authorization: `Bearer ${user.token}` },
+        }
+      ).then((res) => res.json()),
+      fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/cover-letter?resume_id=${selectedResumeId}`,
+        {
+          headers: { Authorization: `Bearer ${user.token}` },
+        }
+      ).then((res) => res.json()),
     ])
       .then(([analysesData, jobMatchesData, coverLettersData]) => {
         if (!analysesData.success) {
@@ -154,12 +163,15 @@ function DashboardContent() {
   const handleDeleteCoverLetter = async (id: string) => {
     if (!user) return;
     try {
-      const res = await fetch(`/api/cover-letter/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/cover-letter/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.message || "Failed to delete cover letter");
@@ -191,7 +203,7 @@ function DashboardContent() {
     try {
       const formData = new FormData();
       formData.append("file", uploadFile);
-      const res = await fetch("/api/upload", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${user.token}`,

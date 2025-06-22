@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { useUserStore } from "@/lib/useUserStore";
@@ -26,7 +26,7 @@ import { Input } from "@/components/ui/input";
 import DividerSm from "@/components/DividerSm";
 import { useResumeSelectionStore } from "@/lib/useResumeSelectionStore";
 
-export default function Dashboard() {
+function DashboardContent() {
   const [analyses, setAnalyses] = useState<any[]>([]);
   const [jobMatches, setJobMatches] = useState<any[]>([]);
   const [coverLetters, setCoverLetters] = useState<any[]>([]);
@@ -596,5 +596,13 @@ export default function Dashboard() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense>
+      <DashboardContent />
+    </Suspense>
   );
 }

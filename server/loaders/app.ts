@@ -7,7 +7,10 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://aligncv.vercel.app", // Your production domain
+  "https://aligncv.vercel.app",
+  "https://align-cv.vercel.app",
+  "https://align-cv-git-main-anish-dangols-projects.vercel.app",
+  "https://align-rlhgq77nm-anish-dangols-projects.vercel.app",
 ];
 
 app.use(
@@ -16,8 +19,8 @@ app.use(
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
 
-      // Allow dynamically generated Vercel preview URLs
-      if (origin.endsWith("-aligncv.vercel.app")) {
+      // Allow all Vercel preview and production URLs
+      if (origin.endsWith(".vercel.app")) {
         return callback(null, true);
       }
 

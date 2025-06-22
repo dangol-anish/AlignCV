@@ -151,7 +151,8 @@ function SignInContent() {
             variant="outline"
             className="w-full flex items-center justify-center gap-2 border-stone-700 text-stone-100 hover:text-stone-100 hover:bg-stone-800 cursor-pointer"
             onClick={() => {
-              let redirectTo = window.location.origin + "/auth/callback";
+              let baseUrl = window.location.origin;
+              let redirectTo = baseUrl + "/auth/callback";
               if (redirect) {
                 const encoded = encodeURIComponent(redirect);
                 redirectTo += `?redirect=${encoded}`;
